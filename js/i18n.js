@@ -19,6 +19,8 @@ export const TRANSLATIONS = {
     allView: 'All Stacked',
     calcReportBtn: 'Calculation Report',
     langBtn: '🌐 EN / PL',
+    kofiBtn: 'Buy me a coffee',
+    kofiTitle: 'Buy me a coffee on Ko-fi',
 
     // Hero Welcome Overlay on Canvas
     heroWelcomeTitle: 'Select a Beam Configuration to Start',
@@ -123,6 +125,8 @@ export const TRANSLATIONS = {
     allView: 'Wszystkie wykresy',
     calcReportBtn: 'Raport obliczeniowy',
     langBtn: '🌐 PL / EN',
+    kofiBtn: 'Postaw mi kawę',
+    kofiTitle: 'Postaw mi kawę na Ko-fi',
 
     // Hero Welcome Overlay on Canvas
     heroWelcomeTitle: 'Wybierz schemat belki na start',

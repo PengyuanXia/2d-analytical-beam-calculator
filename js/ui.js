@@ -400,6 +400,11 @@ export class BeamCalculatorApp {
         : `<span class="text-sm">🌐</span> <strong>PL</strong> / EN`;
     }
 
+    const btnKofi = document.getElementById('btnKofi');
+    const lblKofiText = document.getElementById('lblKofiText');
+    if (lblKofiText && t.kofiBtn) lblKofiText.textContent = t.kofiBtn;
+    if (btnKofi && t.kofiTitle) btnKofi.title = t.kofiTitle;
+
     document.getElementById('appMainTitle').textContent = t.appTitle;
     document.getElementById('appGreeting').textContent = t.greeting;
     document.getElementById('btnOpenTemplates').textContent = t.presetsBtn;
