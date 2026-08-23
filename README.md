@@ -36,40 +36,6 @@ Computes and visualizes:
 
 ---
 
-## 🐙 How to Push to GitHub Using Git
-
-Follow these simple steps in your terminal or Command Prompt / PowerShell:
-
-### Step 1: Initialize Git Repository (if not already initialized)
-```bash
-git init
-```
-
-### Step 2: Add all project files
-```bash
-git add .
-```
-
-### Step 3: Create your commit
-```bash
-git commit -m "feat: 2D Analytical Beam Calculator with Presets and Exact Euler-Bernoulli Solver"
-```
-
-### Step 4: Link your GitHub repository
-Create a new empty repository on [GitHub](https://github.com/new), then run:
-```bash
-git remote add origin https://github.com/<YOUR-USERNAME>/<YOUR-REPOSITORY-NAME>.git
-```
-*(Replace `<YOUR-USERNAME>` and `<YOUR-REPOSITORY-NAME>` with your actual GitHub username and repository name)*
-
-### Step 5: Push to GitHub
-```bash
-git branch -M main
-git push -u origin main
-```
-
----
-
 ## 🚀 Deployment to Vercel
 
 This repository is preconfigured for **zero-config deployment on Vercel**:
