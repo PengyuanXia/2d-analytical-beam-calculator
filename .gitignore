@@ -1,0 +1,21 @@
+# Node & Vercel
+node_modules
+.vercel
+.vercel_build_output
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# OS Files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo

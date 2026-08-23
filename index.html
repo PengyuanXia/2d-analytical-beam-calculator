@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2D Analytical Beam Calculator</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- KaTeX for exact analytical formula rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/beam-calculator.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- 1. Window Title Bar -->
+    <header class="window-title-bar">
+      <div class="flex items-center gap-3">
+        <div class="window-title">
+          <svg style="width: 22px; height: 22px; flex-shrink: 0;" class="text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+          </svg>
+          <span class="font-bold text-slate-800 text-[14px]" id="appMainTitle">2D Analytical Beam Calculator</span>
+        </div>
+        <nav class="window-menu">
+          <button class="menu-btn font-semibold text-blue-700 hover:text-blue-900" id="btnOpenTemplates">📚 Presets</button>
+          <button class="menu-btn opacity-50" id="btnUndo" title="Undo (Ctrl+Z)">↶ Undo</button>
+          <button class="menu-btn opacity-50" id="btnRedo" title="Redo (Ctrl+Y)">↷ Redo</button>
+          <button class="menu-btn" id="btnExportPNG">Export PNG</button>
+        </nav>
+      </div>
+      <div class="user-greeting">
+        <span class="font-medium text-slate-600 text-[12.5px]" id="appGreeting">Analytical Euler-Bernoulli Engine</span>
+      </div>
+    </header>
+
+    <!-- 2. Top Controls Ribbon -->
+    <div class="top-ribbon">
+
+      <div class="ribbon-center">
+        <div class="radio-pill-group">
+          <button class="radio-pill active" data-view="reactions">
+            <span class="radio-dot"></span> Reactions
+          </button>
+          <button class="radio-pill" data-view="shear">
+            <span class="radio-dot"></span> Shear Force T(x)
+          </button>
+          <button class="radio-pill" data-view="moment">
+            <span class="radio-dot"></span> Bending Moment M(x)
+          </button>
+          <button class="radio-pill" data-view="displacement">
+            <span class="radio-dot"></span> Deflection w(x) [mm]
+          </button>
+          <button class="radio-pill" data-view="all">
+            <span class="radio-dot"></span> All Stacked
+          </button>
+        </div>
+      </div>
+
+      <div class="ribbon-right">
+        <!-- Language Switcher Button near Calculation Report -->
+        <button class="btn-lang" id="btnToggleLang" title="Switch Language (English / Polski)">
+          <span class="text-sm">🌐</span> <strong>EN</strong> / PL
+        </button>
+
+        <!-- Calculation Report Button -->
+        <button class="btn-calc-details" id="btnCalcDetails">
+          <svg class="w-4.5 h-4.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <span id="btnCalcDetailsText">Calculation Report</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 3. Main Workspace Split -->
+    <div class="main-workspace">
+      
+      <!-- Left Sidebar: Direct Tabular Inputs -->
+      <aside class="sidebar-container">
+        <div class="sidebar-scroll">
+          
+          <!-- Beam Parameters Card -->
+          <div class="poly-card">
+            <div class="poly-card-header">
+              <div class="poly-card-title">
+                <svg class="w-4 h-4 text-blue-600 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+                <span id="lblBeamParamsTitle">Beam Parameters</span>
+              </div>
+            </div>
+            <div class="poly-card-body">
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[12px] text-slate-700 font-semibold mb-1" id="lblLength">Length L [m]</label>
+                  <input type="number" id="beamLength" step="0.1" min="0.5" max="100" class="poly-input text-center font-bold" value="6.0">
+                </div>
+                <div>
+                  <label class="block text-[12px] text-slate-700 font-semibold mb-1" id="lblRigidity">EJ [kN·m²]</label>
+                  <input type="number" id="beamEI" step="1" min="0.001" class="poly-input text-center font-bold" value="1">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Supports Card -->
+          <div class="poly-card">
+            <div class="poly-card-header">
+              <div class="poly-card-title">
+                <svg class="w-4 h-4 text-blue-600 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+                <span id="lblSupportsTitle">Supports</span>
+              </div>
+            </div>
+            <div class="poly-card-body">
+              <div class="poly-table-container">
+                <table class="poly-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 27%;">x [m]</th>
+                      <th style="width: 35%;">Type</th>
+                      <th style="width: 28%;" id="lblSupportMovementCol">Movement [m]</th>
+                      <th style="width: 10%;"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableSupportsBody">
+                    <!-- Dynamic Support Rows -->
+                  </tbody>
+                </table>
+              </div>
+              <button class="btn-add" id="btnAddSupport">+ Add Support</button>
+            </div>
+          </div>
+
+          <!-- Hinges Card -->
+          <div class="poly-card">
+            <div class="poly-card-header">
+              <div class="poly-card-title">
+                <svg class="w-4 h-4 text-blue-600 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+                <span id="lblHingesTitle">Internal Hinges (M = 0)</span>
+              </div>
+            </div>
+            <div class="poly-card-body">
+              <div class="poly-table-container">
+                <table class="poly-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 35%;">x [m]</th>
+                      <th style="width: 55%;">Condition</th>
+                      <th style="width: 10%;"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableHingesBody">
+                    <!-- Dynamic Hinge Rows -->
+                  </tbody>
+                </table>
+              </div>
+              <button class="btn-add" id="btnAddHinge">+ Add Hinge</button>
+            </div>
+          </div>
+
+          <!-- Point Loads Card -->
+          <div class="poly-card">
+            <div class="poly-card-header">
+              <div class="poly-card-title">
+                <svg class="w-4 h-4 text-blue-600 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+                <span id="lblPointLoadsTitle">Point Loads & Moments</span>
+              </div>
+            </div>
+            <div class="poly-card-body">
+              <div class="poly-table-container">
+                <table class="poly-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 30%;">x [m]</th>
+                      <th style="width: 30%;">Fz [kN] (P)</th>
+                      <th style="width: 30%;">M [kNm]</th>
+                      <th style="width: 10%;"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tablePointLoadsBody">
+                    <!-- Dynamic Point Load Rows -->
+                  </tbody>
+                </table>
+              </div>
+              <button class="btn-add" id="btnAddPointLoad">+ Add Point Load / Moment</button>
+            </div>
+          </div>
+
+          <!-- Distributed Loads Card -->
+          <div class="poly-card">
+            <div class="poly-card-header">
+              <div class="poly-card-title">
+                <svg class="w-4 h-4 text-blue-600 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+                <span id="lblDistLoadsTitle">Distributed Loads</span>
+              </div>
+            </div>
+            <div class="poly-card-body">
+              <div class="poly-table-container">
+                <table class="poly-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 22%;">x1 [m]</th>
+                      <th style="width: 22%;">x2 [m]</th>
+                      <th style="width: 23%;">q1 [kN/m]</th>
+                      <th style="width: 23%;">q2 [kN/m]</th>
+                      <th style="width: 10%;"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableDistLoadsBody">
+                    <!-- Dynamic Distributed Load Rows -->
+                  </tbody>
+                </table>
+              </div>
+              <button class="btn-add" id="btnAddDistLoad">+ Add Distributed Load (q)</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Sidebar Footer Badge -->
+        <div class="sidebar-footer">
+          <div class="poly-badge">
+            <div class="badge-logo-icon">📐</div>
+            <div>
+              <div class="font-bold text-xs text-slate-800" id="lblSidebarBadge">2D Analytical Beam Calculator</div>
+              <div class="text-[10px] text-slate-500 font-semibold" id="lblSidebarSubBadge">Exact Analytical Method</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Diagram Canvas Area -->
+      <main class="canvas-container">
+        
+        <!-- Canvas Background Watermark -->
+        <div class="student-license-watermark">
+          2D BEAM CALCULATOR
+        </div>
+
+        <!-- Canvas Floating Toolbars -->
+        <div class="canvas-toolbar-overlay">
+          <button class="tool-btn" onclick="window.app.setViewMode('reactions')">Reactions</button>
+          <button class="tool-btn" onclick="window.app.setViewMode('shear')">T(x)</button>
+          <button class="tool-btn" onclick="window.app.setViewMode('moment')">M(x)</button>
+          <button class="tool-btn" onclick="window.app.setViewMode('displacement')">Deflection w(x)</button>
+        </div>
+
+        <!-- HTML5 Canvas Element -->
+        <canvas id="beamCanvas" class="canvas-main"></canvas>
+
+        <!-- Floating Cursor Tooltip -->
+        <div id="cursorTooltip" class="cursor-tooltip" style="display: none;"></div>
+
+        <!-- Canvas Presets Showcase Overlay (Visible on launch & via Presets button) -->
+        <div class="canvas-presets-overlay" id="canvasPresetsOverlay">
+          <div class="presets-hero-content">
+            <div class="presets-hero-header">
+              <div class="presets-hero-badge">
+                <span>📐 Euler-Bernoulli Analytical Engine</span>
+              </div>
+              <h2 class="presets-hero-title" id="heroWelcomeTitle">
+                Select a Beam Configuration to Start
+              </h2>
+              <p class="presets-hero-subtitle" id="heroWelcomeSubtitle">
+                Choose a benchmark template to instantly view reactions, shear force T(x), bending moment M(x), and deflection w(x).
+              </p>
+            </div>
+
+            <!-- Quick Preset Cards Grid -->
+            <div class="hero-presets-grid" id="heroPresetsGrid">
+              <!-- Injected dynamically by JS -->
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+    </div>
+
+    <!-- 4. Bottom Status Bar -->
+    <footer class="status-bar">
+      <div class="status-left">
+        <div class="status-item">
+          <span class="text-slate-500">x =</span>
+          <span class="status-val" id="statusX">0.000 m</span>
+        </div>
+        <div class="status-item">
+          <span class="text-slate-500">T =</span>
+          <span class="status-val text-blue-700" id="statusV">0.00 kN</span>
+        </div>
+        <div class="status-item">
+          <span class="text-slate-500">M =</span>
+          <span class="status-val text-emerald-700" id="statusM">0.00 kNm</span>
+        </div>
+        <div class="status-item">
+          <span class="text-slate-500">w =</span>
+          <span class="status-val text-cyan-700" id="statusU">0.000 mm</span>
+        </div>
+      </div>
+
+      <div class="status-right" id="statusEquilibrium">
+        <span class="status-badge-ok">✓ Statically Determinate</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Modal: Calculation Details -->
+  <div class="modal-overlay" id="modalCalcDetails">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+          </svg>
+          <span id="lblCalcReportModalTitle">Analytical Calculation Report</span>
+        </div>
+        <button class="btn-icon-del text-base" id="btnCloseCalcModal">✕</button>
+      </div>
+      <div class="modal-body" id="modalCalcBody">
+        <!-- Rendered Analytical Report -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btnPrintCalcModalFooter" onclick="window.print()">Print / Export PDF</button>
+        <button class="btn-primary" id="btnCloseCalcModalFooter">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Presets -->
+  <div class="modal-overlay" id="modalTemplates">
+    <div class="modal-content" style="max-width: 720px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span id="lblPresetsModalTitle">📚 Benchmark Presets</span>
+        </div>
+        <button class="btn-icon-del text-base" id="btnCloseTemplatesModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="space-y-3" id="templatesList">
+          <!-- Preset Cards -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add Element (Support, Hinge, Point Load, Distributed Load) -->
+  <div class="modal-overlay" id="modalAddElement">
+    <div class="modal-content" style="max-width: 460px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span id="lblAddElementModalTitle">Add Element</span>
+        </div>
+        <button class="btn-icon-del text-base" id="btnCloseAddElementModal">✕</button>
+      </div>
+      <div class="modal-body" id="modalAddElementBody">
+        <!-- Form injected dynamically based on element type -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btnCancelAddElement">Cancel</button>
+        <button class="btn-primary" id="btnConfirmAddElement">Add to Beam</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Module -->
+  <script type="module" src="js/ui.js"></script>
+</body>
+</html>
