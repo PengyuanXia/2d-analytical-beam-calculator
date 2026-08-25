@@ -33,8 +33,8 @@ export const TRANSLATIONS = {
     // Hero Welcome Overlay on Canvas
     heroWelcomeTitle: 'Select a Beam Configuration to Start',
     heroWelcomeSubtitle: 'Choose a benchmark template to instantly view reactions, shear force T(x), bending moment M(x), and deflection w(x).',
-    blankBeamTitle: 'Blank Beam (Custom Design)',
-    blankBeamDesc: 'Start with a blank beam (L = 6.0m) to add your own custom supports and loads from scratch.',
+    blankBeamTitle: 'Blank Canvas (Custom Design)',
+    blankBeamDesc: 'Start with a completely blank canvas to build your structure and supports from scratch.',
     
     // Sidebar
     beamParamsTitle: 'Beam Parameters',
@@ -147,8 +147,8 @@ export const TRANSLATIONS = {
     // Hero Welcome Overlay on Canvas
     heroWelcomeTitle: 'Wybierz schemat belki na start',
     heroWelcomeSubtitle: 'Wybierz jeden z klasycznych schematów, aby natychmiast zobaczyć reakcje, wykres sił tnących T(x), momentów M(x) i ugięć w(x).',
-    blankBeamTitle: 'Czysta belka (Własny projekt)',
-    blankBeamDesc: 'Rozpocznij od pustej belki (L = 6.0m), aby od podstaw dodać własne podpory i obciążenia.',
+    blankBeamTitle: 'Czyste płótno (Własny projekt)',
+    blankBeamDesc: 'Rozpocznij od całkowicie czystego płótna, aby od podstaw zbudować własną konstrukcję.',
     
     // Sidebar
     beamParamsTitle: 'Parametry belki',

@@ -203,6 +203,7 @@ export class BeamCalculatorApp {
       input.addEventListener('change', () => {
         this.beamData.length = Math.max(0.1, parseFloat(this.inputLength.value) || 6.0);
         this.beamData.EI = Math.max(0.0001, parseFloat(this.inputEI.value) || 1.0);
+        this.beamData.isBlank = false;
         this.recalculate(true);
         this.hideHeroOverlay();
       });
@@ -365,15 +366,11 @@ export class BeamCalculatorApp {
       this.beamData = {
         length: 6.0,
         EI: 1.0,
-        supports: [
-          { id: 's1', x: 0.0, fz: true, my: false, movement: 0.0 },
-          { id: 's2', x: 6.0, fz: true, my: false, movement: 0.0 }
-        ],
+        supports: [],
         hinges: [],
         pointLoads: [],
         distLoads: [],
-        temperatureLoads: [],
-        stiffnessSegments: [],
+        isBlank: true,
         currentLoadCase: 'All',
         currentView: 'reactions'
       };
@@ -496,6 +493,13 @@ export class BeamCalculatorApp {
   }
 
   updateStatusEquilibrium() {
+    if (this.beamData && this.beamData.isBlank) {
+      this.statusEquilibrium.innerHTML = `
+        <span class="status-badge-ok" style="background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1;">✨ Blank Canvas</span>
+      `;
+      return;
+    }
+
     if (!this.solution || !this.solution.isStable) {
       this.statusEquilibrium.innerHTML = `
         <span class="bg-red-100 text-red-800 px-2.5 py-0.5 rounded font-bold text-[11.5px]">${this.t.statusUnstable}</span>
@@ -525,6 +529,14 @@ export class BeamCalculatorApp {
   }
 
   updateStatusBarCursor(values) {
+    if (this.beamData && this.beamData.isBlank) {
+      this.statusX.textContent = 'x = -';
+      this.statusV.textContent = 'T = -';
+      this.statusM.textContent = 'M = -';
+      this.statusU.textContent = 'w = -';
+      return;
+    }
+
     if (!values || !this.solution || !this.solution.isStable) {
       this.statusX.textContent = values ? `x = ${formatNum(values.x)} m` : 'x = 0 m';
       this.statusV.textContent = 'T = -';
@@ -731,6 +743,7 @@ export class BeamCalculatorApp {
       const posX = Math.max(0, parseFloat(document.getElementById('inpAddSupportX').value) || 0);
       const sType = document.getElementById('inpAddSupportType').value;
       const movement = parseFloat(document.getElementById('inpAddSupportMovement').value) || 0;
+      this.beamData.isBlank = false;
       this.checkAndElongateBeam(posX);
       this.beamData.supports.push({
         id: `s_${Date.now()}`,
@@ -770,6 +783,7 @@ export class BeamCalculatorApp {
 
     this.currentAddConfirmHandler = () => {
       const posX = Math.max(0, parseFloat(document.getElementById('inpAddHingeX').value) || 0);
+      this.beamData.isBlank = false;
       this.checkAndElongateBeam(posX);
       this.beamData.hinges.push({
         id: `h_${Date.now()}`,
@@ -816,6 +830,7 @@ export class BeamCalculatorApp {
       const posX = Math.max(0, parseFloat(document.getElementById('inpAddPointX').value) || 0);
       const fz = parseFloat(document.getElementById('inpAddPointFz').value) || 0;
       const my = parseFloat(document.getElementById('inpAddPointMy').value) || 0;
+      this.beamData.isBlank = false;
       this.checkAndElongateBeam(posX);
       this.beamData.pointLoads.push({
         id: `p_${Date.now()}`,
@@ -871,6 +886,7 @@ export class BeamCalculatorApp {
       const x2 = Math.max(0, parseFloat(document.getElementById('inpAddDistX2').value) || 0);
       const q1 = parseFloat(document.getElementById('inpAddDistQ1').value) || 0;
       const q2 = parseFloat(document.getElementById('inpAddDistQ2').value) || 0;
+      this.beamData.isBlank = false;
       this.checkAndElongateBeam(Math.max(x1, x2));
       this.beamData.distLoads.push({
         id: `d_${Date.now()}`,
@@ -930,6 +946,7 @@ export class BeamCalculatorApp {
 
   loadPreset(preset) {
     this.beamData = JSON.parse(JSON.stringify(preset.data));
+    this.beamData.isBlank = false;
     if (!this.beamData.temperatureLoads) this.beamData.temperatureLoads = [];
     if (!this.beamData.stiffnessSegments) this.beamData.stiffnessSegments = [];
     this.inputLength.value = this.beamData.length;

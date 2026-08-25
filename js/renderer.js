@@ -184,8 +184,7 @@ export class BeamRenderer {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.width, this.height);
 
-    if (!this.beamData || !this.solution) {
-      this.drawEmptyState();
+    if (!this.beamData || !this.solution || this.beamData.isBlank) {
       return;
     }
 
@@ -198,14 +197,6 @@ export class BeamRenderer {
     if (this.solution.isStable && this.cursorX !== null && this.cursorX >= 0 && this.cursorX <= this.beamData.length) {
       this.drawCrosshair(this.cursorX);
     }
-  }
-
-  drawEmptyState() {
-    const ctx = this.ctx;
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = 'bold 16px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('2D Analytical Beam Calculator - Ready', this.width / 2, this.height / 2);
   }
 
   drawSingleDiagramView() {
