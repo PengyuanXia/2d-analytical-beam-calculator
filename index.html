@@ -32,6 +32,10 @@
           <button class="menu-btn font-semibold text-blue-700 hover:text-blue-900" id="btnOpenTemplates">📚 Presets</button>
           <button class="menu-btn opacity-50" id="btnUndo" title="Undo (Ctrl+Z)">↶ Undo</button>
           <button class="menu-btn opacity-50" id="btnRedo" title="Redo (Ctrl+Y)">↷ Redo</button>
+          <button class="menu-btn" id="btnSaveModel" title="Save beam structure to file">💾 Save</button>
+          <button class="menu-btn" id="btnLoadModel" title="Load beam structure from file">📂 Load</button>
+          <input type="file" id="inpModelFile" accept=".json" style="display: none;">
+          <button class="menu-btn" id="btnShareLink" title="Copy shareable link to clipboard">🔗 Share</button>
           <button class="menu-btn" id="btnExportPNG">Export PNG</button>
         </nav>
       </div>
@@ -388,6 +392,9 @@
       </div>
     </div>
   </div>
+
+  <!-- Toast Floating Notification -->
+  <div id="toastNotification" class="toast-notification"></div>
 
   <!-- Main Module -->
   <script type="module" src="js/ui.js"></script>

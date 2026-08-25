@@ -40,9 +40,13 @@ export class BeamCalculatorApp {
     this.bindEvents();
     this.applyLanguage();
     
-    // Save initial state to undo stack
-    this.saveHistoryState();
-    this.recalculate(false);
+    // Check if a model is encoded in URL hash (#model=...)
+    const loadedFromHash = this.checkUrlHashModel();
+    if (!loadedFromHash) {
+      // Save initial state to undo stack
+      this.saveHistoryState();
+      this.recalculate(false);
+    }
   }
 
   get t() {
@@ -83,7 +87,12 @@ export class BeamCalculatorApp {
     // Navigation Buttons
     this.btnUndo = document.getElementById('btnUndo');
     this.btnRedo = document.getElementById('btnRedo');
+    this.btnSaveModel = document.getElementById('btnSaveModel');
+    this.btnLoadModel = document.getElementById('btnLoadModel');
+    this.inpModelFile = document.getElementById('inpModelFile');
+    this.btnShareLink = document.getElementById('btnShareLink');
     this.btnToggleLang = document.getElementById('btnToggleLang');
+    this.toastNotification = document.getElementById('toastNotification');
 
     // Status bar items
     this.statusX = document.getElementById('statusX');
@@ -158,6 +167,20 @@ export class BeamCalculatorApp {
     }
     if (this.btnRedo) {
       this.btnRedo.addEventListener('click', () => this.redo());
+    }
+
+    // Save & Load & Share Model
+    if (this.btnSaveModel) {
+      this.btnSaveModel.addEventListener('click', () => this.saveModelJSON());
+    }
+    if (this.btnLoadModel) {
+      this.btnLoadModel.addEventListener('click', () => this.inpModelFile && this.inpModelFile.click());
+    }
+    if (this.inpModelFile) {
+      this.inpModelFile.addEventListener('change', (e) => this.loadModelJSON(e));
+    }
+    if (this.btnShareLink) {
+      this.btnShareLink.addEventListener('click', () => this.copyShareLink());
     }
 
     // Language Switcher
@@ -250,17 +273,6 @@ export class BeamCalculatorApp {
             this.currentAddConfirmHandler();
           }
         }
-      }
-    });
-
-    // Close modals when clicking outside on the dark backdrop
-    [this.modalAddElement, this.modalCalcDetails, this.modalTemplates].forEach(modal => {
-      if (modal) {
-        modal.addEventListener('click', (e) => {
-          if (e.target === modal) {
-            modal.classList.remove('open');
-          }
-        });
       }
     });
 
@@ -410,6 +422,9 @@ export class BeamCalculatorApp {
     document.getElementById('btnOpenTemplates').textContent = t.presetsBtn;
     if (this.btnUndo) this.btnUndo.textContent = t.undoBtn;
     if (this.btnRedo) this.btnRedo.textContent = t.redoBtn;
+    if (this.btnSaveModel) this.btnSaveModel.textContent = t.saveModelBtn;
+    if (this.btnLoadModel) this.btnLoadModel.textContent = t.loadModelBtn;
+    if (this.btnShareLink) this.btnShareLink.textContent = t.shareBtn;
     document.getElementById('btnExportPNG').textContent = t.exportPngBtn;
     document.getElementById('btnCalcDetailsText').textContent = t.calcReportBtn;
 
@@ -470,6 +485,11 @@ export class BeamCalculatorApp {
       this.renderer.setData(this.beamData, this.solution, this.beamData.currentView);
       this.updateStatusEquilibrium();
       this.renderTables();
+
+      // Auto-save model
+      try {
+        localStorage.setItem('polybeam_autosave_model', JSON.stringify(this.beamData));
+      } catch (e) {}
     } catch (err) {
       console.error("Calculation error:", err);
     }
@@ -684,14 +704,13 @@ export class BeamCalculatorApp {
 
   openAddSupportModal() {
     const t = this.t;
-    const defaultX = this.beamData.supports.length === 0 ? 0.0 : this.beamData.length;
     this.modalAddElementTitle.textContent = t.modalAddSupportTitle;
     this.modalAddElementBody.innerHTML = `
       <div class="space-y-4">
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1.5">${t.positionLabel}</label>
-            <input type="number" id="inpAddSupportX" step="0.1" min="0" class="poly-input text-left font-mono font-bold text-sm px-3 py-2" value="${defaultX}">
+            <input type="number" id="inpAddSupportX" step="0.1" min="0" class="poly-input text-left font-mono font-bold text-sm px-3 py-2" value="0" placeholder="0">
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1.5">${t.supportTypeLabel}</label>
@@ -703,7 +722,7 @@ export class BeamCalculatorApp {
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1.5">${t.modalAddSupportMovementLabel}</label>
-          <input type="number" id="inpAddSupportMovement" step="0.001" class="poly-input text-left font-mono font-bold text-sm px-3 py-2 text-indigo-700" value="0">
+          <input type="number" id="inpAddSupportMovement" step="0.001" class="poly-input text-left font-mono font-bold text-sm px-3 py-2 text-indigo-700" value="0" placeholder="0">
         </div>
       </div>
     `;
@@ -727,19 +746,21 @@ export class BeamCalculatorApp {
     this.modalAddElement.classList.add('open');
     setTimeout(() => {
       const inp = document.getElementById('inpAddSupportX');
-      if (inp) inp.focus();
+      if (inp) {
+        inp.focus();
+        inp.select();
+      }
     }, 100);
   }
 
   openAddHingeModal() {
     const t = this.t;
-    const defaultX = +(this.beamData.length / 2).toFixed(2);
     this.modalAddElementTitle.textContent = t.modalAddHingeTitle;
     this.modalAddElementBody.innerHTML = `
       <div class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1.5">${t.positionLabel}</label>
-          <input type="number" id="inpAddHingeX" step="0.1" min="0" class="poly-input text-left font-mono font-bold text-sm px-3 py-2" value="${defaultX}">
+          <input type="number" id="inpAddHingeX" step="0.1" min="0" class="poly-input text-left font-mono font-bold text-sm px-3 py-2" value="0" placeholder="0">
         </div>
         <div class="text-xs text-slate-600 bg-slate-50 p-2.5 rounded border border-slate-200 font-medium">
           ${t.hingeCondition}
@@ -762,28 +783,30 @@ export class BeamCalculatorApp {
     this.modalAddElement.classList.add('open');
     setTimeout(() => {
       const inp = document.getElementById('inpAddHingeX');
-      if (inp) inp.focus();
+      if (inp) {
+        inp.focus();
+        inp.select();
+      }
     }, 100);
   }
 
   openAddPointLoadModal() {
     const t = this.t;
-    const defaultX = +(this.beamData.length / 2).toFixed(2);
     this.modalAddElementTitle.textContent = t.modalAddPointLoadTitle;
     this.modalAddElementBody.innerHTML = `
       <div class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1.5">${t.positionLabel}</label>
-          <input type="number" id="inpAddPointX" step="0.1" min="0" class="poly-input text-left font-mono font-bold text-sm px-3 py-2" value="${defaultX}">
+          <input type="number" id="inpAddPointX" step="0.1" min="0" class="poly-input text-left font-mono font-bold text-sm px-3 py-2" value="0" placeholder="0">
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1.5">${t.pointForceLabel}</label>
-            <input type="number" id="inpAddPointFz" step="1" class="poly-input text-left font-mono font-bold text-sm px-3 py-2 text-red-600" value="20">
+            <input type="number" id="inpAddPointFz" step="1" class="poly-input text-left font-mono font-bold text-sm px-3 py-2 text-red-600" value="0" placeholder="0">
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1.5">${t.pointMomentLabel}</label>
-            <input type="number" id="inpAddPointMy" step="1" class="poly-input text-left font-mono font-bold text-sm px-3 py-2 text-amber-600" value="0">
+            <input type="number" id="inpAddPointMy" step="1" class="poly-input text-left font-mono font-bold text-sm px-3 py-2 text-amber-600" value="0" placeholder="0">
           </div>
         </div>
       </div>
@@ -808,7 +831,10 @@ export class BeamCalculatorApp {
     this.modalAddElement.classList.add('open');
     setTimeout(() => {
       const inp = document.getElementById('inpAddPointX');
-      if (inp) inp.focus();
+      if (inp) {
+        inp.focus();
+        inp.select();
+      }
     }, 100);
   }
 
@@ -820,21 +846,21 @@ export class BeamCalculatorApp {
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1.5">${t.startPosLabel}</label>
-            <input type="number" id="inpAddDistX1" step="0.1" min="0" class="poly-input text-left font-mono font-bold text-sm px-3 py-2" value="0">
+            <input type="number" id="inpAddDistX1" step="0.1" min="0" class="poly-input text-left font-mono font-bold text-sm px-3 py-2" value="0" placeholder="0">
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1.5">${t.endPosLabel}</label>
-            <input type="number" id="inpAddDistX2" step="0.1" min="0" class="poly-input text-left font-mono font-bold text-sm px-3 py-2" value="${this.beamData.length}">
+            <input type="number" id="inpAddDistX2" step="0.1" min="0" class="poly-input text-left font-mono font-bold text-sm px-3 py-2" value="0" placeholder="0">
           </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1.5">${t.startIntensityLabel}</label>
-            <input type="number" id="inpAddDistQ1" step="1" class="poly-input text-left font-mono font-bold text-sm px-3 py-2 text-red-600" value="10">
+            <input type="number" id="inpAddDistQ1" step="1" class="poly-input text-left font-mono font-bold text-sm px-3 py-2 text-red-600" value="0" placeholder="0">
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1.5">${t.endIntensityLabel}</label>
-            <input type="number" id="inpAddDistQ2" step="1" class="poly-input text-left font-mono font-bold text-sm px-3 py-2 text-red-600" value="10">
+            <input type="number" id="inpAddDistQ2" step="1" class="poly-input text-left font-mono font-bold text-sm px-3 py-2 text-red-600" value="0" placeholder="0">
           </div>
         </div>
       </div>
@@ -861,7 +887,10 @@ export class BeamCalculatorApp {
     this.modalAddElement.classList.add('open');
     setTimeout(() => {
       const inp = document.getElementById('inpAddDistX1');
-      if (inp) inp.focus();
+      if (inp) {
+        inp.focus();
+        inp.select();
+      }
     }, 100);
   }
 
@@ -907,6 +936,124 @@ export class BeamCalculatorApp {
     this.inputEI.value = this.beamData.EI;
     this.setViewMode(this.beamData.currentView || 'reactions');
     this.recalculate(true);
+  }
+
+  showToast(message, duration = 3000) {
+    if (!this.toastNotification) this.toastNotification = document.getElementById('toastNotification');
+    if (!this.toastNotification) return;
+    this.toastNotification.textContent = message;
+    this.toastNotification.classList.add('show');
+    if (this._toastTimeout) clearTimeout(this._toastTimeout);
+    this._toastTimeout = setTimeout(() => {
+      this.toastNotification.classList.remove('show');
+    }, duration);
+  }
+
+  saveModelJSON() {
+    try {
+      const exportData = {
+        version: "1.0",
+        appName: "2D Analytical Beam Calculator",
+        timestamp: new Date().toISOString(),
+        data: this.beamData
+      };
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `beam_model_${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      this.showToast(this.t.toastSaveSuccess || '💾 Beam model saved as JSON file.');
+    } catch (err) {
+      console.error('Save model error:', err);
+    }
+  }
+
+  loadModelJSON(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target.result);
+        const data = json.data || json;
+        if (!data || typeof data !== 'object' || typeof data.length !== 'number' || !Array.isArray(data.supports)) {
+          throw new Error('Invalid beam structure in JSON');
+        }
+        this.loadPreset({ data });
+        this.hideHeroOverlay();
+        this.showToast(this.t.toastLoadSuccess || '📂 Beam model loaded successfully!');
+      } catch (err) {
+        console.error('Error loading model JSON:', err);
+        this.showToast(this.t.toastLoadError || '❌ Invalid JSON file format.');
+      }
+      e.target.value = '';
+    };
+    reader.readAsText(file);
+  }
+
+  copyShareLink() {
+    try {
+      const cleanData = {
+        length: this.beamData.length,
+        EI: this.beamData.EI,
+        supports: this.beamData.supports,
+        hinges: this.beamData.hinges,
+        pointLoads: this.beamData.pointLoads,
+        distLoads: this.beamData.distLoads,
+        currentView: this.beamData.currentView
+      };
+      const encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(cleanData)))));
+      const shareUrl = `${window.location.origin}${window.location.pathname}#model=${encoded}`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          this.showToast(this.t.toastShareSuccess || '🔗 Link copied to clipboard!');
+        }).catch(() => {
+          this.fallbackCopyLink(shareUrl);
+        });
+      } else {
+        this.fallbackCopyLink(shareUrl);
+      }
+    } catch (err) {
+      console.error('Error creating share link:', err);
+      this.showToast(this.t.toastShareError || '❌ Failed to copy link.');
+    }
+  }
+
+  fallbackCopyLink(text) {
+    try {
+      const temp = document.createElement('input');
+      temp.value = text;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      document.body.removeChild(temp);
+      this.showToast(this.t.toastShareSuccess || '🔗 Link copied to clipboard!');
+    } catch (err) {
+      console.error('Fallback copy error:', err);
+    }
+  }
+
+  checkUrlHashModel() {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#model=')) {
+      try {
+        const encoded = hash.substring(7);
+        const jsonStr = decodeURIComponent(escape(atob(decodeURIComponent(encoded))));
+        const data = JSON.parse(jsonStr);
+        if (data && typeof data.length === 'number' && Array.isArray(data.supports)) {
+          this.loadPreset({ data });
+          this.hideHeroOverlay();
+          return true;
+        }
+      } catch (err) {
+        console.warn('Could not decode URL model hash:', err);
+      }
+    }
+    return false;
   }
 
   exportPNG() {

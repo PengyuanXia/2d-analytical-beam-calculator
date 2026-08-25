@@ -618,7 +618,7 @@ export class BeamRenderer {
 
       if (Math.abs(my) > 1e-4) {
         const radius = 18 * scale;
-        const isClockwise = my > 0;
+        const isClockwise = my < 0;
         this.drawMomentArc(ctx, px, beamY, radius, isClockwise, '#d97706', scale);
 
         ctx.fillStyle = '#d97706';
@@ -666,7 +666,7 @@ export class BeamRenderer {
       const px = this.beamToPixelX(x);
       if (Math.abs(val) > 1e-3) {
         const radius = 20 * scale;
-        const isClockwise = val > 0;
+        const isClockwise = val < 0;
         this.drawMomentArc(ctx, px, beamY, radius, isClockwise, '#047857', scale);
 
         ctx.fillStyle = '#047857';
