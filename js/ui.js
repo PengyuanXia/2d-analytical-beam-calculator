@@ -7,12 +7,12 @@
  * Popup window dialogs for adding supports, hinges, point loads, and distributed loads.
  */
 
-import { DEFAULT_BEAM } from './constants.js';
-import { AnalyticalBeamSolver } from './analyticalSolver.js';
-import { BeamRenderer } from './renderer.js';
-import { generateStepByStepReport } from './stepByStep.js';
-import { PRESETS } from './presets.js';
-import { TRANSLATIONS, getSavedLanguage, setSavedLanguage } from './i18n.js';
+import { DEFAULT_BEAM } from './constants.js?v=1.2.1';
+import { AnalyticalBeamSolver } from './analyticalSolver.js?v=1.2.1';
+import { BeamRenderer } from './renderer.js?v=1.2.1';
+import { generateStepByStepReport } from './stepByStep.js?v=1.2.1';
+import { PRESETS } from './presets.js?v=1.2.1';
+import { TRANSLATIONS, getSavedLanguage, setSavedLanguage } from './i18n.js?v=1.2.1';
 
 function formatNum(val, maxDec = 2) {
   if (val === null || val === undefined || isNaN(val)) return '-';
