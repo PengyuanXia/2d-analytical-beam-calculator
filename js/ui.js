@@ -84,6 +84,11 @@ export class BeamCalculatorApp {
     this.btnConfirmAddElement = document.getElementById('btnConfirmAddElement');
     this.btnCloseAddElementModal = document.getElementById('btnCloseAddElementModal');
 
+    // Sidebar Container & Toggle
+    this.sidebarContainer = document.getElementById('sidebarContainer');
+    this.btnToggleSidebar = document.getElementById('btnToggleSidebar');
+    this.btnToggleSidebarNav = document.getElementById('btnToggleSidebarNav');
+
     // Navigation Buttons
     this.btnUndo = document.getElementById('btnUndo');
     this.btnRedo = document.getElementById('btnRedo');
@@ -111,6 +116,18 @@ export class BeamCalculatorApp {
       this.updateStatusBarCursor(cursorValues);
     });
     this.renderer.setLanguage(this.lang);
+
+    if (window.ResizeObserver) {
+      const container = document.querySelector('.canvas-container');
+      if (container) {
+        new ResizeObserver(() => {
+          if (this.renderer) {
+            this.renderer.resize();
+            this.renderer.draw();
+          }
+        }).observe(container);
+      }
+    }
   }
 
   saveHistoryState() {
@@ -162,6 +179,22 @@ export class BeamCalculatorApp {
   }
 
   bindEvents() {
+    // Sidebar Fold / Unfold Toggle
+    if (this.btnToggleSidebar) {
+      this.btnToggleSidebar.addEventListener('click', () => this.toggleSidebar());
+    }
+    if (this.btnToggleSidebarNav) {
+      this.btnToggleSidebarNav.addEventListener('click', () => this.toggleSidebar());
+    }
+
+    // Shortcut: Ctrl+B to toggle sidebar
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        this.toggleSidebar();
+      }
+    });
+
     // Undo & Redo button clicks
     if (this.btnUndo) {
       this.btnUndo.addEventListener('click', () => this.undo());
@@ -185,6 +218,13 @@ export class BeamCalculatorApp {
     }
     if (this.btnShareLink) {
       this.btnShareLink.addEventListener('click', () => this.copyShareLink());
+    }
+
+    const btnResetView = document.getElementById('btnResetCanvasView');
+    if (btnResetView) {
+      btnResetView.addEventListener('click', () => {
+        if (this.renderer) this.renderer.resetView();
+      });
     }
 
     // Language Switcher
@@ -420,6 +460,7 @@ export class BeamCalculatorApp {
 
     document.getElementById('appMainTitle').textContent = t.appTitle;
     document.getElementById('appGreeting').textContent = t.greeting;
+    if (this.btnToggleSidebarNav) this.btnToggleSidebarNav.textContent = t.sidebarToggleBtn;
     document.getElementById('btnOpenTemplates').textContent = t.presetsBtn;
     if (this.btnUndo) this.btnUndo.textContent = t.undoBtn;
     if (this.btnRedo) this.btnRedo.textContent = t.redoBtn;
@@ -980,6 +1021,29 @@ export class BeamCalculatorApp {
     this.recalculate(true);
     this.showHeroOverlay();
     this.showToast(this.t.toastClearSuccess || '🗑️ Canvas cleared.');
+  }
+
+  toggleSidebar() {
+    if (!this.sidebarContainer) return;
+    this.sidebarContainer.classList.toggle('collapsed');
+    const isCollapsed = this.sidebarContainer.classList.contains('collapsed');
+    
+    const expandText = this.t.sidebarExpandTitle || 'Expand sidebar';
+    const collapseText = this.t.sidebarCollapseTitle || 'Collapse sidebar';
+
+    if (this.btnToggleSidebar) {
+      this.btnToggleSidebar.title = isCollapsed ? expandText : collapseText;
+    }
+    if (this.btnToggleSidebarNav) {
+      this.btnToggleSidebarNav.title = isCollapsed ? expandText : collapseText;
+    }
+
+    setTimeout(() => {
+      if (this.renderer) {
+        this.renderer.resize();
+        this.renderer.draw();
+      }
+    }, 260);
   }
 
   showToast(message, duration = 3000) {

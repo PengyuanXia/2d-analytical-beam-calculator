@@ -29,6 +29,17 @@ export class BeamRenderer {
     this.lang = 'en';
 
     this.padding = { left: 95, right: 85, top: 40, bottom: 50 };
+
+    // Pan & Zoom state for Touch & Mouse navigation
+    this.panX = 0;
+    this.panY = 0;
+    this.zoomFactor = 1.0;
+    this.isDragging = false;
+    this.dragStartX = 0;
+    this.dragStartY = 0;
+    this.initialPanX = 0;
+    this.initialPanY = 0;
+
     this.setupListeners();
   }
 
@@ -41,11 +52,60 @@ export class BeamRenderer {
     return TRANSLATIONS[this.lang] || TRANSLATIONS.en;
   }
 
+  resetView() {
+    this.panX = 0;
+    this.panY = 0;
+    this.zoomFactor = 1.0;
+    this.draw();
+  }
+
+  zoomIn() {
+    this.zoomFactor = Math.min(3.5, this.zoomFactor * 1.25);
+    this.draw();
+  }
+
+  zoomOut() {
+    this.zoomFactor = Math.max(0.3, this.zoomFactor / 1.25);
+    this.draw();
+  }
+
   setupListeners() {
+    // 1. Mouse Drag Pan & Hover
+    this.canvas.addEventListener('mousedown', (e) => {
+      if (e.button === 0 || e.button === 1) {
+        this.isDragging = true;
+        this.dragStartX = e.clientX;
+        this.dragStartY = e.clientY;
+        this.initialPanX = this.panX;
+        this.initialPanY = this.panY;
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (this.isDragging) {
+        this.isDragging = false;
+        this.canvas.style.cursor = 'crosshair';
+      }
+    });
+
     this.canvas.addEventListener('mousemove', (e) => {
       const rect = this.canvas.getBoundingClientRect();
       const pixelX = e.clientX - rect.left;
       const pixelY = e.clientY - rect.top;
+
+      if (this.isDragging) {
+        const dx = e.clientX - this.dragStartX;
+        const dy = e.clientY - this.dragStartY;
+        if (Math.hypot(dx, dy) > 3) {
+          this.panX = this.initialPanX + dx;
+          this.panY = this.initialPanY + dy;
+          this.canvas.style.cursor = 'grabbing';
+          this.hideTooltip();
+          this.cursorX = null;
+          this.draw();
+          return;
+        }
+      }
 
       if (!this.beamData) return;
 
@@ -65,13 +125,121 @@ export class BeamRenderer {
     });
 
     this.canvas.addEventListener('mouseleave', () => {
-      this.cursorX = null;
-      this.hideTooltip();
-      this.draw();
-      if (this.onCursorMove) {
-        this.onCursorMove(null);
+      if (!this.isDragging) {
+        this.cursorX = null;
+        this.hideTooltip();
+        this.draw();
+        if (this.onCursorMove) {
+          this.onCursorMove(null);
+        }
       }
     });
+
+    // Double-click to reset view
+    this.canvas.addEventListener('dblclick', () => {
+      this.resetView();
+    });
+
+    // Mouse wheel zoom centered on cursor
+    this.canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const rect = this.canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      const zoomSpeed = 0.0012;
+      const delta = -e.deltaY * zoomSpeed;
+      const oldZoom = this.zoomFactor;
+      const newZoom = Math.max(0.3, Math.min(3.5, oldZoom * (1 + delta)));
+
+      const factor = newZoom / oldZoom;
+      this.panX = mouseX - factor * (mouseX - this.panX);
+      this.panY = mouseY - factor * (mouseY - this.panY);
+      this.zoomFactor = newZoom;
+      this.draw();
+    }, { passive: false });
+
+    // 2. Touch Navigation for Tablet Users (1-finger Pan & 2-finger Pinch Zoom)
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartPanX = 0;
+    let touchStartPanY = 0;
+    let initialPinchDist = 0;
+    let touchStartZoom = 1.0;
+    let isPinching = false;
+    let isTouchPanning = false;
+    let lastTapTime = 0;
+
+    this.canvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        const now = Date.now();
+        if (now - lastTapTime < 350) {
+          // Double-tap: Reset View (Fit)
+          this.resetView();
+          lastTapTime = 0;
+          return;
+        }
+        lastTapTime = now;
+
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchStartPanX = this.panX;
+        touchStartPanY = this.panY;
+        isTouchPanning = true;
+        isPinching = false;
+      } else if (e.touches.length === 2) {
+        isPinching = true;
+        isTouchPanning = false;
+        initialPinchDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        touchStartZoom = this.zoomFactor;
+        touchStartPanX = this.panX;
+        touchStartPanY = this.panY;
+        touchStartX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        touchStartY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      }
+    }, { passive: false });
+
+    this.canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+
+      if (isPinching && e.touches.length === 2) {
+        const currentDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        if (initialPinchDist > 0) {
+          const factor = currentDist / initialPinchDist;
+          this.zoomFactor = Math.max(0.3, Math.min(3.5, touchStartZoom * factor));
+          const currentMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+          const currentMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+          this.panX = touchStartPanX + (currentMidX - touchStartX);
+          this.panY = touchStartPanY + (currentMidY - touchStartY);
+          this.hideTooltip();
+          this.cursorX = null;
+          this.draw();
+        }
+      } else if (isTouchPanning && e.touches.length === 1) {
+        const dx = e.touches[0].clientX - touchStartX;
+        const dy = e.touches[0].clientY - touchStartY;
+
+        // Move the canvas directly with finger!
+        this.panX = touchStartPanX + dx;
+        this.panY = touchStartPanY + dy;
+        this.hideTooltip();
+        this.cursorX = null;
+        this.draw();
+      }
+    }, { passive: false });
+
+    const endTouch = () => {
+      isTouchPanning = false;
+      isPinching = false;
+    };
+    this.canvas.addEventListener('touchend', endTouch);
+    this.canvas.addEventListener('touchcancel', endTouch);
 
     window.addEventListener('resize', () => {
       this.resize();
@@ -102,13 +270,14 @@ export class BeamRenderer {
   beamToPixelX(x) {
     const availableWidth = this.width - this.padding.left - this.padding.right;
     const L = this.beamData ? this.beamData.length : 1;
-    return this.padding.left + (x / L) * availableWidth;
+    return this.padding.left + this.panX + (x / L) * availableWidth * this.zoomFactor;
   }
 
   pixelToBeamX(pixelX) {
     const availableWidth = this.width - this.padding.left - this.padding.right;
     const L = this.beamData ? this.beamData.length : 1;
-    return ((pixelX - this.padding.left) / availableWidth) * L;
+    const totalW = availableWidth * this.zoomFactor;
+    return ((pixelX - this.padding.left - this.panX) / totalW) * L;
   }
 
   evaluateAt(x) {
@@ -201,12 +370,13 @@ export class BeamRenderer {
 
   drawSingleDiagramView() {
     const isReactionsView = this.viewMode === 'reactions';
-    const beamY = isReactionsView ? this.height * 0.30 : this.height * 0.32;
-    const diagramY = this.height * 0.72;
-    const diagramHeight = this.height * 0.44;
+    const beamY = (isReactionsView ? this.height * 0.30 : this.height * 0.32) + this.panY;
+    const diagramY = this.height * 0.72 + this.panY;
+    const diagramHeight = this.height * 0.44 * this.zoomFactor;
+    const structScale = Math.max(0.6, Math.min(2.2, this.zoomFactor));
 
     // 1. Draw Structure & Loads
-    this.drawBeamStructure(beamY);
+    this.drawBeamStructure(beamY, structScale);
 
     if (!this.solution.isStable) {
       this.drawUnstableWarningBanner(diagramY, diagramHeight);
@@ -215,7 +385,7 @@ export class BeamRenderer {
 
     // 2. Draw Active View
     if (isReactionsView) {
-      this.drawReactionArrowsLower(beamY);
+      this.drawReactionArrowsLower(beamY, structScale);
     } else if (this.viewMode === 'shear') {
       // Positive shear T > 0 drawn below the x-axis (invert = true)
       this.drawDiagramCurve(
@@ -265,21 +435,22 @@ export class BeamRenderer {
   drawMultiDiagramView() {
     const totalAvailH = this.height - this.padding.top - this.padding.bottom;
     
-    const beamY = this.padding.top + totalAvailH * 0.08;
-    const shearY = this.padding.top + totalAvailH * 0.38;
-    const momentY = this.padding.top + totalAvailH * 0.65;
-    const deflY = this.padding.top + totalAvailH * 0.90;
-    const plotHeight = totalAvailH * 0.18;
+    const beamY = this.padding.top + totalAvailH * 0.08 + this.panY;
+    const shearY = this.padding.top + totalAvailH * 0.38 + this.panY;
+    const momentY = this.padding.top + totalAvailH * 0.65 + this.panY;
+    const deflY = this.padding.top + totalAvailH * 0.90 + this.panY;
+    const plotHeight = totalAvailH * 0.18 * this.zoomFactor;
+    const structScale = 0.72 * Math.max(0.6, Math.min(2.0, this.zoomFactor));
 
     // 1. Structure
-    this.drawBeamStructure(beamY, 0.72);
+    this.drawBeamStructure(beamY, structScale);
 
     if (!this.solution.isStable) {
-      this.drawUnstableWarningBanner(this.height * 0.60, this.height * 0.45);
+      this.drawUnstableWarningBanner(this.height * 0.60 + this.panY, this.height * 0.45 * this.zoomFactor);
       return;
     }
 
-    this.drawReactionArrowsLower(beamY, 0.72);
+    this.drawReactionArrowsLower(beamY, structScale);
 
     // 2. Shear Plot T(x) (drawn with T > 0 downwards)
     this.drawDiagramCurve(
@@ -759,7 +930,7 @@ export class BeamRenderer {
     ctx.fillStyle = '#0f172a';
     ctx.font = 'bold 14.5px Inter, sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText(label, this.padding.left + 8, baseY - maxH / 2 - 14);
+    ctx.fillText(label, this.padding.left + 8 + this.panX, baseY - maxH / 2 - 14);
 
     // 4. Sample and Draw Curve & Shaded Region
     const numSamples = Math.max(120, Math.floor(this.width * 0.6));
@@ -870,7 +1041,7 @@ export class BeamRenderer {
     ctx.lineTo(px, this.height - this.padding.bottom);
     ctx.stroke();
 
-    const beamY = this.viewMode === 'reactions' ? this.height * 0.30 : this.height * 0.32;
+    const beamY = (this.viewMode === 'reactions' ? this.height * 0.30 : this.height * 0.32) + this.panY;
     ctx.setLineDash([]);
     ctx.fillStyle = '#2563eb';
     ctx.beginPath();

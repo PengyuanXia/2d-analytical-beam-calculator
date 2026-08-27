@@ -242,6 +242,7 @@ html, body {
 
 /* Main Workspace Split */
 .main-workspace {
+  --sidebar-w: 410px;
   display: flex;
   flex: 1 1 0%;
   min-height: 0;
@@ -252,7 +253,7 @@ html, body {
 
 /* Sidebar Styles */
 .sidebar-container {
-  width: 410px;
+  width: var(--sidebar-w);
   min-width: 360px;
   max-width: 500px;
   background: var(--bg-sidebar);
@@ -262,6 +263,63 @@ html, body {
   height: 100%;
   min-height: 0;
   overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.25s, max-width 0.25s, opacity 0.2s;
+}
+
+/* Folded / Collapsed Sidebar */
+.sidebar-container.collapsed {
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  border-right: none !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Sidebar Toggle Tab Handle (Thumb-friendly for tablets - Centered vertically & enlarged) */
+.sidebar-toggle-tab {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: var(--sidebar-w);
+  z-index: 30;
+  width: 28px;
+  height: 72px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.09);
+  transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.15s, color 0.15s, border-color 0.15s, width 0.15s;
+  color: #475569;
+}
+
+.sidebar-toggle-tab:hover {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #93c5fd;
+  width: 32px;
+}
+
+.sidebar-toggle-tab .sidebar-toggle-icon {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-container.collapsed + .sidebar-toggle-tab {
+  left: 0;
+  border-left: 1.5px solid #cbd5e1;
+}
+
+.sidebar-container.collapsed + .sidebar-toggle-tab .sidebar-toggle-icon {
+  transform: rotate(180deg);
 }
 
 /* Scrollable Sidebar Panel with visible, easy-to-use scrollbar */
@@ -532,6 +590,9 @@ input[type=number] {
   height: 100%;
   cursor: crosshair;
   position: relative;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* Floating Diagram Cursor Tooltip */
@@ -828,6 +889,47 @@ input[type=number] {
   color: #64748b;
   margin-top: 6px;
   line-height: 1.45;
+}
+
+/* Floating Action Buttons in Canvas Bottom-Right */
+.canvas-bottom-right-controls {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  z-index: 15;
+}
+
+.btn-canvas-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  background: #ffffff;
+  color: #1e40af;
+  border: 1.5px solid #93c5fd;
+  border-radius: 9999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.btn-canvas-action:hover {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(30, 64, 175, 0.18);
+}
+
+.btn-canvas-action:active {
+  transform: translateY(0);
 }
 
 /* Toast Notification */

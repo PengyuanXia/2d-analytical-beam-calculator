@@ -29,6 +29,7 @@
           <span class="font-bold text-slate-800 text-[14px]" id="appMainTitle">2D Analytical Beam Calculator</span>
         </div>
         <nav class="window-menu">
+          <button class="menu-btn font-semibold text-slate-700 hover:text-blue-700" id="btnToggleSidebarNav" title="Toggle Left Sidebar Panel">☰ Panel</button>
           <button class="menu-btn font-semibold text-blue-700 hover:text-blue-900" id="btnOpenTemplates">📚 Presets</button>
           <button class="menu-btn opacity-50" id="btnUndo" title="Undo (Ctrl+Z)">↶ Undo</button>
           <button class="menu-btn opacity-50" id="btnRedo" title="Redo (Ctrl+Y)">↷ Redo</button>
@@ -95,7 +96,7 @@
     <div class="main-workspace">
       
       <!-- Left Sidebar: Direct Tabular Inputs -->
-      <aside class="sidebar-container">
+      <aside class="sidebar-container" id="sidebarContainer">
         <div class="sidebar-scroll">
           
           <!-- Beam Parameters Card -->
@@ -256,6 +257,13 @@
         </div>
       </aside>
 
+      <!-- Sidebar Fold/Unfold Toggle Tab (Thumb-friendly on tablets) -->
+      <button id="btnToggleSidebar" class="sidebar-toggle-tab" title="Toggle Sidebar (Collapse / Expand)" aria-label="Toggle Sidebar">
+        <svg class="sidebar-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </button>
+
       <!-- Main Diagram Canvas Area -->
       <main class="canvas-container">
         
@@ -270,6 +278,7 @@
           <button class="tool-btn" onclick="window.app.setViewMode('shear')">T(x)</button>
           <button class="tool-btn" onclick="window.app.setViewMode('moment')">M(x)</button>
           <button class="tool-btn" onclick="window.app.setViewMode('displacement')">Deflection w(x)</button>
+          <button class="tool-btn text-slate-500 hover:text-blue-700 ml-1" id="btnResetCanvasView" title="Reset View (Fit / Double-tap)">⟲ Fit</button>
         </div>
 
         <!-- HTML5 Canvas Element -->
@@ -277,6 +286,16 @@
 
         <!-- Floating Cursor Tooltip -->
         <div id="cursorTooltip" class="cursor-tooltip" style="display: none;"></div>
+
+        <!-- Floating Action Buttons in bottom-right corner of canvas -->
+        <div class="canvas-bottom-right-controls">
+          <button id="btnClearCanvas" class="btn-canvas-action" title="Clear all elements from canvas (Ctrl+Z to Undo)">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 15px; height: 15px; color: #dc2626;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+            <span id="btnClearCanvasText">Clear Canvas</span>
+          </button>
+        </div>
 
         <!-- Canvas Presets Showcase Overlay (Visible on launch & via Presets button) -->
         <div class="canvas-presets-overlay" id="canvasPresetsOverlay">

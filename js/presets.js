@@ -27,7 +27,7 @@ export const PRESETS = [
       distLoads: [
         { id: 'd1', x1: 0.0, x2: 6.0, q1: 10.0, q2: 10.0 }
       ],
-      currentView: 'moment'
+      currentView: 'reactions'
     }
   },
   {
@@ -52,7 +52,7 @@ export const PRESETS = [
       ],
       distLoads: [],
       currentLoadCase: 'All',
-      currentView: 'moment'
+      currentView: 'reactions'
     }
   },
   {
@@ -78,7 +78,7 @@ export const PRESETS = [
         { id: 'd1', x1: 0.0, x2: 5.0, q1: 12.0, q2: 12.0, loadCase: 'LC1' }
       ],
       currentLoadCase: 'All',
-      currentView: 'moment'
+      currentView: 'reactions'
     }
   },
   {
@@ -106,7 +106,7 @@ export const PRESETS = [
         { id: 'd1', x1: 0.0, x2: 8.0, q1: 10.0, q2: 10.0, loadCase: 'LC1' }
       ],
       currentLoadCase: 'All',
-      currentView: 'moment'
+      currentView: 'reactions'
     }
   },
   {
@@ -135,7 +135,7 @@ export const PRESETS = [
         { id: 'd1', x1: 0.0, x2: 12.0, q1: 8.0, q2: 8.0, loadCase: 'LC1' }
       ],
       currentLoadCase: 'All',
-      currentView: 'moment'
+      currentView: 'reactions'
     }
   },
   {
@@ -164,7 +164,7 @@ export const PRESETS = [
         { id: 'd1', x1: 2.0, x2: 8.0, q1: 0.0, q2: 18.0, loadCase: 'LC1' }
       ],
       currentLoadCase: 'All',
-      currentView: 'moment'
+      currentView: 'reactions'
     }
   },
   {
@@ -190,7 +190,7 @@ export const PRESETS = [
       ],
       distLoads: [],
       currentLoadCase: 'All',
-      currentView: 'moment'
+      currentView: 'reactions'
     }
   },
   {
@@ -215,7 +215,7 @@ export const PRESETS = [
       pointLoads: [],
       distLoads: [],
       currentLoadCase: 'All',
-      currentView: 'moment'
+      currentView: 'reactions'
     }
   }
 ];
