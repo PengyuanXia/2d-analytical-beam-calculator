@@ -87,6 +87,7 @@ export class BeamCalculatorApp {
     // Navigation Buttons
     this.btnUndo = document.getElementById('btnUndo');
     this.btnRedo = document.getElementById('btnRedo');
+    this.btnClearCanvas = document.getElementById('btnClearCanvas');
     this.btnSaveModel = document.getElementById('btnSaveModel');
     this.btnLoadModel = document.getElementById('btnLoadModel');
     this.inpModelFile = document.getElementById('inpModelFile');
@@ -167,6 +168,9 @@ export class BeamCalculatorApp {
     }
     if (this.btnRedo) {
       this.btnRedo.addEventListener('click', () => this.redo());
+    }
+    if (this.btnClearCanvas) {
+      this.btnClearCanvas.addEventListener('click', () => this.clearCanvas());
     }
 
     // Save & Load & Share Model
@@ -419,6 +423,9 @@ export class BeamCalculatorApp {
     document.getElementById('btnOpenTemplates').textContent = t.presetsBtn;
     if (this.btnUndo) this.btnUndo.textContent = t.undoBtn;
     if (this.btnRedo) this.btnRedo.textContent = t.redoBtn;
+    const lblClear = document.getElementById('btnClearCanvasText');
+    if (lblClear) lblClear.textContent = t.clearBtn;
+    if (this.btnClearCanvas) this.btnClearCanvas.title = t.clearBtnTitle;
     if (this.btnSaveModel) this.btnSaveModel.textContent = t.saveModelBtn;
     if (this.btnLoadModel) this.btnLoadModel.textContent = t.loadModelBtn;
     if (this.btnShareLink) this.btnShareLink.textContent = t.shareBtn;
@@ -953,6 +960,26 @@ export class BeamCalculatorApp {
     this.inputEI.value = this.beamData.EI;
     this.setViewMode(this.beamData.currentView || 'reactions');
     this.recalculate(true);
+  }
+
+  clearCanvas() {
+    this.beamData = {
+      length: 6.0,
+      EI: 1.0,
+      supports: [],
+      hinges: [],
+      pointLoads: [],
+      distLoads: [],
+      isBlank: true,
+      currentLoadCase: 'All',
+      currentView: 'reactions'
+    };
+    this.inputLength.value = 6.0;
+    this.inputEI.value = 1.0;
+    this.setViewMode('reactions');
+    this.recalculate(true);
+    this.showHeroOverlay();
+    this.showToast(this.t.toastClearSuccess || '🗑️ Canvas cleared.');
   }
 
   showToast(message, duration = 3000) {
