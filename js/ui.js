@@ -7,12 +7,12 @@
  * Popup window dialogs for adding supports, hinges, point loads, and distributed loads.
  */
 
-import { DEFAULT_BEAM } from './constants.js?v=1.2.2';
-import { AnalyticalBeamSolver } from './analyticalSolver.js?v=1.2.2';
-import { BeamRenderer } from './renderer.js?v=1.2.2';
-import { generateStepByStepReport } from './stepByStep.js?v=1.2.2';
-import { PRESETS } from './presets.js?v=1.2.2';
-import { TRANSLATIONS, getSavedLanguage, setSavedLanguage } from './i18n.js?v=1.2.2';
+import { DEFAULT_BEAM } from './constants.js?v=1.2.3';
+import { AnalyticalBeamSolver } from './analyticalSolver.js?v=1.2.3';
+import { BeamRenderer } from './renderer.js?v=1.2.3';
+import { generateStepByStepReport } from './stepByStep.js?v=1.2.3';
+import { PRESETS } from './presets.js?v=1.2.3';
+import { TRANSLATIONS, getSavedLanguage, setSavedLanguage } from './i18n.js?v=1.2.3';
 
 function formatNum(val, maxDec = 2) {
   if (val === null || val === undefined || isNaN(val)) return '-';
@@ -91,10 +91,11 @@ export class BeamCalculatorApp {
 
     // Contact Modal Elements
     this.modalContact = document.getElementById('modalContact');
-    this.btnOpenContact = document.getElementById('btnOpenContact');
+    this.btnContact = document.getElementById('btnContact');
     this.btnCloseContactModal = document.getElementById('btnCloseContactModal');
     this.btnCloseContactModalFooter = document.getElementById('btnCloseContactModalFooter');
     this.btnCopyEmail = document.getElementById('btnCopyEmail');
+    this.btnCopyEmailText = document.getElementById('btnCopyEmailText');
 
     // Navigation Buttons
     this.btnUndo = document.getElementById('btnUndo');
@@ -298,9 +299,9 @@ export class BeamCalculatorApp {
     document.getElementById('btnCloseCalcModal').addEventListener('click', () => this.closeCalcDetailsModal());
     document.getElementById('btnCloseCalcModalFooter').addEventListener('click', () => this.closeCalcDetailsModal());
 
-    // Contact Modal
-    if (this.btnOpenContact) {
-      this.btnOpenContact.addEventListener('click', () => this.openContactModal());
+    // Contact & Feedback Modal Listeners
+    if (this.btnContact) {
+      this.btnContact.addEventListener('click', () => this.openContactModal());
     }
     if (this.btnCloseContactModal) {
       this.btnCloseContactModal.addEventListener('click', () => this.closeContactModal());
@@ -308,13 +309,13 @@ export class BeamCalculatorApp {
     if (this.btnCloseContactModalFooter) {
       this.btnCloseContactModalFooter.addEventListener('click', () => this.closeContactModal());
     }
+    if (this.btnCopyEmail) {
+      this.btnCopyEmail.addEventListener('click', () => this.copyEmailToClipboard());
+    }
     if (this.modalContact) {
       this.modalContact.addEventListener('click', (e) => {
         if (e.target === this.modalContact) this.closeContactModal();
       });
-    }
-    if (this.btnCopyEmail) {
-      this.btnCopyEmail.addEventListener('click', () => this.copyEmail());
     }
 
     document.getElementById('btnOpenTemplates').addEventListener('click', () => this.showHeroOverlay());
@@ -500,21 +501,27 @@ export class BeamCalculatorApp {
     document.getElementById('btnExportPNG').textContent = t.exportPngBtn;
     document.getElementById('btnCalcDetailsText').textContent = t.calcReportBtn;
 
-    // Contact Button & Modal
-    const lblContactBtn = document.getElementById('lblContactBtnText');
-    if (lblContactBtn && t.contactBtn) lblContactBtn.textContent = t.contactBtn;
-    if (this.btnOpenContact && t.contactBtnTitle) this.btnOpenContact.title = t.contactBtnTitle;
+    // Contact Creator & Modal
+    const lblContactText = document.getElementById('lblContactText');
+    if (lblContactText && t.contactBtn) lblContactText.textContent = t.contactBtn;
+    if (this.btnContact && t.contactBtn) this.btnContact.title = `${t.contactBtn} & Feedback`;
+    
     const lblContactModalTitle = document.getElementById('lblContactModalTitle');
     if (lblContactModalTitle && t.contactModalTitle) lblContactModalTitle.textContent = t.contactModalTitle;
-    const lblContactSubtitle = document.getElementById('lblContactSubtitle');
-    if (lblContactSubtitle && t.contactSubtitle) lblContactSubtitle.textContent = t.contactSubtitle;
-    const lblContactEmailHeader = document.getElementById('lblContactEmailHeader');
-    if (lblContactEmailHeader && t.contactEmailHeader) lblContactEmailHeader.textContent = t.contactEmailHeader;
-    const lblContactGithubText = document.getElementById('lblContactGithubText');
-    if (lblContactGithubText && t.contactGithubText) lblContactGithubText.textContent = t.contactGithubText;
-    const lblCopyEmailText = document.getElementById('lblCopyEmailText');
-    if (lblCopyEmailText && t.contactCopyBtn) lblCopyEmailText.textContent = t.contactCopyBtn;
-    if (this.btnCloseContactModalFooter && t.contactCloseBtn) this.btnCloseContactModalFooter.textContent = t.contactCloseBtn;
+    const lblContactAuthorSub = document.getElementById('lblContactAuthorSub');
+    if (lblContactAuthorSub && t.contactAuthorSub) lblContactAuthorSub.textContent = t.contactAuthorSub;
+    const lblContactEmailTitle = document.getElementById('lblContactEmailTitle');
+    if (lblContactEmailTitle && t.contactEmailTitle) lblContactEmailTitle.textContent = t.contactEmailTitle;
+    const lblContactGithubTitle = document.getElementById('lblContactGithubTitle');
+    if (lblContactGithubTitle && t.contactGithubTitle) lblContactGithubTitle.textContent = t.contactGithubTitle;
+    const lblContactGithubSub = document.getElementById('lblContactGithubSub');
+    if (lblContactGithubSub && t.contactGithubSub) lblContactGithubSub.textContent = t.contactGithubSub;
+    const lblContactKofiTitle = document.getElementById('lblContactKofiTitle');
+    if (lblContactKofiTitle && t.contactKofiTitle) lblContactKofiTitle.textContent = t.contactKofiTitle;
+    const lblContactKofiSub = document.getElementById('lblContactKofiSub');
+    if (lblContactKofiSub && t.contactKofiSub) lblContactKofiSub.textContent = t.contactKofiSub;
+    if (this.btnCopyEmailText && t.copyBtn) this.btnCopyEmailText.textContent = t.copyBtn;
+    if (this.btnCloseContactModalFooter && t.closeBtn) this.btnCloseContactModalFooter.textContent = t.closeBtn;
 
     // View buttons
     document.querySelector('[data-view="reactions"]').innerHTML = `<span class="radio-dot"></span> ${t.reactionsView}`;
@@ -1101,21 +1108,23 @@ export class BeamCalculatorApp {
     }
   }
 
-  copyEmail() {
+  copyEmailToClipboard() {
     const email = 'pengyuan.xia.dokt@pw.edu.pl';
-    navigator.clipboard.writeText(email).then(() => {
-      this.showToast(this.t.toastEmailCopied || '📋 Email copied to clipboard!');
-      const lbl = document.getElementById('lblCopyEmailText');
-      if (lbl) {
-        const oldText = lbl.textContent;
-        lbl.textContent = this.t.contactCopiedBtn || 'Copied!';
-        setTimeout(() => {
-          lbl.textContent = oldText;
-        }, 2000);
-      }
-    }).catch(() => {
-      this.showToast('❌ Failed to copy email to clipboard.');
-    });
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(email).then(() => {
+        this.showToast(this.t.toastEmailCopied || '📋 Email copied to clipboard!');
+        if (this.btnCopyEmailText) {
+          this.btnCopyEmailText.textContent = this.t.copiedBtn || '✓ Copied!';
+          setTimeout(() => {
+            if (this.btnCopyEmailText) this.btnCopyEmailText.textContent = this.t.copyBtn || '📋 Copy';
+          }, 2200);
+        }
+      }).catch(() => {
+        this.showToast('pengyuan.xia.dokt@pw.edu.pl');
+      });
+    } else {
+      this.showToast('pengyuan.xia.dokt@pw.edu.pl');
+    }
   }
 
   showToast(message, duration = 3000) {
