@@ -7,12 +7,12 @@
  * Popup window dialogs for adding supports, hinges, point loads, and distributed loads.
  */
 
-import { DEFAULT_BEAM } from './constants.js?v=1.2.1';
-import { AnalyticalBeamSolver } from './analyticalSolver.js?v=1.2.1';
-import { BeamRenderer } from './renderer.js?v=1.2.1';
-import { generateStepByStepReport } from './stepByStep.js?v=1.2.1';
-import { PRESETS } from './presets.js?v=1.2.1';
-import { TRANSLATIONS, getSavedLanguage, setSavedLanguage } from './i18n.js?v=1.2.1';
+import { DEFAULT_BEAM } from './constants.js?v=1.2.2';
+import { AnalyticalBeamSolver } from './analyticalSolver.js?v=1.2.2';
+import { BeamRenderer } from './renderer.js?v=1.2.2';
+import { generateStepByStepReport } from './stepByStep.js?v=1.2.2';
+import { PRESETS } from './presets.js?v=1.2.2';
+import { TRANSLATIONS, getSavedLanguage, setSavedLanguage } from './i18n.js?v=1.2.2';
 
 function formatNum(val, maxDec = 2) {
   if (val === null || val === undefined || isNaN(val)) return '-';
@@ -88,6 +88,13 @@ export class BeamCalculatorApp {
     this.sidebarContainer = document.getElementById('sidebarContainer');
     this.btnToggleSidebar = document.getElementById('btnToggleSidebar');
     this.btnToggleSidebarNav = document.getElementById('btnToggleSidebarNav');
+
+    // Contact Modal Elements
+    this.modalContact = document.getElementById('modalContact');
+    this.btnOpenContact = document.getElementById('btnOpenContact');
+    this.btnCloseContactModal = document.getElementById('btnCloseContactModal');
+    this.btnCloseContactModalFooter = document.getElementById('btnCloseContactModalFooter');
+    this.btnCopyEmail = document.getElementById('btnCopyEmail');
 
     // Navigation Buttons
     this.btnUndo = document.getElementById('btnUndo');
@@ -291,6 +298,25 @@ export class BeamCalculatorApp {
     document.getElementById('btnCloseCalcModal').addEventListener('click', () => this.closeCalcDetailsModal());
     document.getElementById('btnCloseCalcModalFooter').addEventListener('click', () => this.closeCalcDetailsModal());
 
+    // Contact Modal
+    if (this.btnOpenContact) {
+      this.btnOpenContact.addEventListener('click', () => this.openContactModal());
+    }
+    if (this.btnCloseContactModal) {
+      this.btnCloseContactModal.addEventListener('click', () => this.closeContactModal());
+    }
+    if (this.btnCloseContactModalFooter) {
+      this.btnCloseContactModalFooter.addEventListener('click', () => this.closeContactModal());
+    }
+    if (this.modalContact) {
+      this.modalContact.addEventListener('click', (e) => {
+        if (e.target === this.modalContact) this.closeContactModal();
+      });
+    }
+    if (this.btnCopyEmail) {
+      this.btnCopyEmail.addEventListener('click', () => this.copyEmail());
+    }
+
     document.getElementById('btnOpenTemplates').addEventListener('click', () => this.showHeroOverlay());
     document.getElementById('btnCloseTemplatesModal').addEventListener('click', () => this.closeTemplatesModal());
 
@@ -311,6 +337,7 @@ export class BeamCalculatorApp {
         this.closeAddElementModal();
         this.closeCalcDetailsModal();
         this.closeTemplatesModal();
+        this.closeContactModal();
         this.hideHeroOverlay();
       } else if (e.key === 'Enter') {
         if (this.modalAddElement && this.modalAddElement.classList.contains('open')) {
@@ -472,6 +499,22 @@ export class BeamCalculatorApp {
     if (this.btnShareLink) this.btnShareLink.textContent = t.shareBtn;
     document.getElementById('btnExportPNG').textContent = t.exportPngBtn;
     document.getElementById('btnCalcDetailsText').textContent = t.calcReportBtn;
+
+    // Contact Button & Modal
+    const lblContactBtn = document.getElementById('lblContactBtnText');
+    if (lblContactBtn && t.contactBtn) lblContactBtn.textContent = t.contactBtn;
+    if (this.btnOpenContact && t.contactBtnTitle) this.btnOpenContact.title = t.contactBtnTitle;
+    const lblContactModalTitle = document.getElementById('lblContactModalTitle');
+    if (lblContactModalTitle && t.contactModalTitle) lblContactModalTitle.textContent = t.contactModalTitle;
+    const lblContactSubtitle = document.getElementById('lblContactSubtitle');
+    if (lblContactSubtitle && t.contactSubtitle) lblContactSubtitle.textContent = t.contactSubtitle;
+    const lblContactEmailHeader = document.getElementById('lblContactEmailHeader');
+    if (lblContactEmailHeader && t.contactEmailHeader) lblContactEmailHeader.textContent = t.contactEmailHeader;
+    const lblContactGithubText = document.getElementById('lblContactGithubText');
+    if (lblContactGithubText && t.contactGithubText) lblContactGithubText.textContent = t.contactGithubText;
+    const lblCopyEmailText = document.getElementById('lblCopyEmailText');
+    if (lblCopyEmailText && t.contactCopyBtn) lblCopyEmailText.textContent = t.contactCopyBtn;
+    if (this.btnCloseContactModalFooter && t.contactCloseBtn) this.btnCloseContactModalFooter.textContent = t.contactCloseBtn;
 
     // View buttons
     document.querySelector('[data-view="reactions"]').innerHTML = `<span class="radio-dot"></span> ${t.reactionsView}`;
@@ -1044,6 +1087,35 @@ export class BeamCalculatorApp {
         this.renderer.draw();
       }
     }, 260);
+  }
+
+  openContactModal() {
+    if (this.modalContact) {
+      this.modalContact.classList.add('open');
+    }
+  }
+
+  closeContactModal() {
+    if (this.modalContact) {
+      this.modalContact.classList.remove('open');
+    }
+  }
+
+  copyEmail() {
+    const email = 'pengyuan.xia.dokt@pw.edu.pl';
+    navigator.clipboard.writeText(email).then(() => {
+      this.showToast(this.t.toastEmailCopied || '📋 Email copied to clipboard!');
+      const lbl = document.getElementById('lblCopyEmailText');
+      if (lbl) {
+        const oldText = lbl.textContent;
+        lbl.textContent = this.t.contactCopiedBtn || 'Copied!';
+        setTimeout(() => {
+          lbl.textContent = oldText;
+        }, 2000);
+      }
+    }).catch(() => {
+      this.showToast('❌ Failed to copy email to clipboard.');
+    });
   }
 
   showToast(message, duration = 3000) {
