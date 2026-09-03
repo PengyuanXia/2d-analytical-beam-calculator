@@ -7,12 +7,12 @@
  * Popup window dialogs for adding supports, hinges, point loads, and distributed loads.
  */
 
-import { DEFAULT_BEAM } from './constants.js?v=1.2.4';
-import { AnalyticalBeamSolver } from './analyticalSolver.js?v=1.2.4';
-import { BeamRenderer } from './renderer.js?v=1.2.4';
-import { generateStepByStepReport } from './stepByStep.js?v=1.2.4';
-import { PRESETS } from './presets.js?v=1.2.4';
-import { TRANSLATIONS, getSavedLanguage, setSavedLanguage } from './i18n.js?v=1.2.4';
+import { DEFAULT_BEAM } from './constants.js?v=1.2.5';
+import { AnalyticalBeamSolver } from './analyticalSolver.js?v=1.2.5';
+import { BeamRenderer } from './renderer.js?v=1.2.5';
+import { generateStepByStepReport } from './stepByStep.js?v=1.2.5';
+import { PRESETS } from './presets.js?v=1.2.5';
+import { TRANSLATIONS, getSavedLanguage, setSavedLanguage } from './i18n.js?v=1.2.5';
 
 function formatNum(val, maxDec = 2) {
   if (val === null || val === undefined || isNaN(val)) return '-';
@@ -386,6 +386,47 @@ export class BeamCalculatorApp {
     if (this.heroWelcomeTitle) this.heroWelcomeTitle.textContent = t.heroWelcomeTitle;
     if (this.heroWelcomeSubtitle) this.heroWelcomeSubtitle.textContent = t.heroWelcomeSubtitle;
 
+    // 1. Custom Design Card (1st Place)
+    const blankCard = document.createElement('div');
+    blankCard.className = 'preset-hero-card';
+    blankCard.style.backgroundColor = '#f8fafc';
+    blankCard.style.border = '1.5px dashed #3b82f6';
+    blankCard.innerHTML = `
+      <div>
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;">
+          <span class="hero-card-title" style="color: #1d4ed8; font-weight: 800;">✨ ${t.blankBeamTitle || 'Custom Design'}</span>
+          <span style="font-size: 11px; font-family: monospace; font-weight: bold; color: #1d4ed8; background: #dbeafe; padding: 2px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0;">L = 6.0m</span>
+        </div>
+        <div class="hero-card-desc">${t.blankBeamDesc}</div>
+      </div>
+      <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #dbeafe; display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; font-weight: 700; color: #1d4ed8;">
+        <span>✏️ ${t.blankBeamBtn || 'Create from Scratch'}</span>
+        <span>+</span>
+      </div>
+    `;
+
+    blankCard.addEventListener('click', () => {
+      this.beamData = {
+        length: 6.0,
+        EI: 1.0,
+        supports: [],
+        hinges: [],
+        pointLoads: [],
+        distLoads: [],
+        isBlank: true,
+        currentLoadCase: 'All',
+        currentView: 'reactions'
+      };
+      this.inputLength.value = 6.0;
+      this.inputEI.value = 1.0;
+      this.setViewMode('reactions');
+      this.recalculate(true);
+      this.hideHeroOverlay();
+    });
+
+    this.heroPresetsGrid.appendChild(blankCard);
+
+    // 2. Benchmark Presets
     PRESETS.forEach(preset => {
       const title = typeof preset.name === 'object' ? (preset.name[this.lang] || preset.name.en) : preset.name;
       const desc = typeof preset.description === 'object' ? (preset.description[this.lang] || preset.description.en) : preset.description;
@@ -413,47 +454,6 @@ export class BeamCalculatorApp {
 
       this.heroPresetsGrid.appendChild(card);
     });
-
-    // Add Blank Beam Card
-    const blankCard = document.createElement('div');
-    blankCard.className = 'preset-hero-card';
-    blankCard.style.backgroundColor = '#f8fafc';
-    blankCard.style.borderStyle = 'dashed';
-    blankCard.style.borderColor = '#cbd5e1';
-    blankCard.innerHTML = `
-      <div>
-        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;">
-          <span class="hero-card-title" style="color: #1e293b;">✨ ${t.blankBeamTitle}</span>
-          <span style="font-size: 11px; font-family: monospace; font-weight: bold; color: #475569; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0;">L = 6.0m</span>
-        </div>
-        <div class="hero-card-desc">${t.blankBeamDesc}</div>
-      </div>
-      <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 600; color: #475569;">
-        <span>Create from Scratch</span>
-        <span>+</span>
-      </div>
-    `;
-
-    blankCard.addEventListener('click', () => {
-      this.beamData = {
-        length: 6.0,
-        EI: 1.0,
-        supports: [],
-        hinges: [],
-        pointLoads: [],
-        distLoads: [],
-        isBlank: true,
-        currentLoadCase: 'All',
-        currentView: 'reactions'
-      };
-      this.inputLength.value = 6.0;
-      this.inputEI.value = 1.0;
-      this.setViewMode('reactions');
-      this.recalculate(true);
-      this.hideHeroOverlay();
-    });
-
-    this.heroPresetsGrid.appendChild(blankCard);
   }
 
   checkAndElongateBeam(newX) {
@@ -593,7 +593,7 @@ export class BeamCalculatorApp {
   updateStatusEquilibrium() {
     if (this.beamData && this.beamData.isBlank) {
       this.statusEquilibrium.innerHTML = `
-        <span class="status-badge-ok" style="background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1;">✨ Blank Canvas</span>
+        <span class="status-badge-ok" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1;">✨ ${this.t.blankBeamBadge || 'Custom Design'}</span>
       `;
       return;
     }
