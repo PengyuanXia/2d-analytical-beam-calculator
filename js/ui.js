@@ -7,12 +7,12 @@
  * Popup window dialogs for adding supports, hinges, point loads, and distributed loads.
  */
 
-import { DEFAULT_BEAM } from './constants.js?v=1.2.7';
-import { AnalyticalBeamSolver } from './analyticalSolver.js?v=1.2.7';
-import { BeamRenderer } from './renderer.js?v=1.2.7';
-import { generateStepByStepReport } from './stepByStep.js?v=1.2.7';
-import { PRESETS } from './presets.js?v=1.2.7';
-import { TRANSLATIONS, getSavedLanguage, setSavedLanguage } from './i18n.js?v=1.2.7';
+import { DEFAULT_BEAM } from './constants.js?v=1.2.8';
+import { AnalyticalBeamSolver } from './analyticalSolver.js?v=1.2.8';
+import { BeamRenderer } from './renderer.js?v=1.2.8';
+import { generateStepByStepReport } from './stepByStep.js?v=1.2.8';
+import { PRESETS } from './presets.js?v=1.2.8';
+import { TRANSLATIONS, getSavedLanguage, setSavedLanguage } from './i18n.js?v=1.2.8';
 
 function formatNum(val, maxDec = 2) {
   if (val === null || val === undefined || isNaN(val)) return '-';
@@ -108,9 +108,6 @@ export class BeamCalculatorApp {
     this.btnToggleLang = document.getElementById('btnToggleLang');
     this.toastNotification = document.getElementById('toastNotification');
 
-    // Custom Design Guide Elements
-    this.customDesignGuideOverlay = document.getElementById('customDesignGuideOverlay');
-    this.btnGuideOpenPresets = document.getElementById('btnGuideOpenPresets');
 
     // Status bar items
     this.statusX = document.getElementById('statusX');
@@ -124,9 +121,16 @@ export class BeamCalculatorApp {
     const canvas = document.getElementById('beamCanvas');
     const tooltip = document.getElementById('cursorTooltip');
 
-    this.renderer = new BeamRenderer(canvas, tooltip, (cursorValues) => {
-      this.updateStatusBarCursor(cursorValues);
-    });
+    this.renderer = new BeamRenderer(
+      canvas,
+      tooltip,
+      (cursorValues) => {
+        this.updateStatusBarCursor(cursorValues);
+      },
+      () => {
+        this.updateStatusEquilibrium();
+      }
+    );
     this.renderer.setLanguage(this.lang);
 
     if (window.ResizeObserver) {
@@ -322,25 +326,12 @@ export class BeamCalculatorApp {
       });
     }
 
-    if (this.btnGuideOpenPresets) {
-      this.btnGuideOpenPresets.addEventListener('click', () => this.showHeroOverlay());
-    }
-
-    const btnCloseGuide = document.getElementById('btnCloseGuide');
-    if (btnCloseGuide) {
-      btnCloseGuide.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (this.customDesignGuideOverlay) {
-          this.customDesignGuideOverlay.style.display = 'none';
-        }
-      });
-    }
-
     const beamCanvas = document.getElementById('beamCanvas');
     if (beamCanvas) {
       beamCanvas.addEventListener('mousedown', () => {
-        if (this.customDesignGuideOverlay && this.customDesignGuideOverlay.style.display !== 'none') {
-          this.customDesignGuideOverlay.style.display = 'none';
+        if (this.beamData && this.beamData.isBlank) {
+          this.beamData.isBlank = false;
+          this.recalculate(false);
         }
       });
     }
@@ -397,14 +388,12 @@ export class BeamCalculatorApp {
     if (this.canvasPresetsOverlay) {
       this.canvasPresetsOverlay.classList.remove('hidden');
     }
-    this.updateCustomDesignGuideVisibility();
   }
 
   hideHeroOverlay() {
     if (this.canvasPresetsOverlay) {
       this.canvasPresetsOverlay.classList.add('hidden');
     }
-    this.updateCustomDesignGuideVisibility();
   }
 
   renderHeroPresets() {
@@ -586,32 +575,9 @@ export class BeamCalculatorApp {
     if (this.btnCancelAddElement) this.btnCancelAddElement.textContent = t.cancelBtn;
     if (this.btnConfirmAddElement) this.btnConfirmAddElement.textContent = t.confirmAddBtn;
 
-    // Custom Design Guide
-    const lblCustomGuideTitle = document.getElementById('lblCustomGuideTitle');
-    if (lblCustomGuideTitle && t.customGuideTitle) lblCustomGuideTitle.textContent = t.customGuideTitle;
-    const lblCustomGuideSubtitle = document.getElementById('lblCustomGuideSubtitle');
-    if (lblCustomGuideSubtitle && t.customGuideSubtitle) lblCustomGuideSubtitle.textContent = t.customGuideSubtitle;
-    const lblStep1Title = document.getElementById('lblStep1Title');
-    if (lblStep1Title && t.step1Title) lblStep1Title.textContent = t.step1Title;
-    const lblStep1Desc = document.getElementById('lblStep1Desc');
-    if (lblStep1Desc && t.step1Desc) lblStep1Desc.innerHTML = t.step1Desc;
-    const lblStep2Title = document.getElementById('lblStep2Title');
-    if (lblStep2Title && t.step2Title) lblStep2Title.textContent = t.step2Title;
-    const lblStep2Desc = document.getElementById('lblStep2Desc');
-    if (lblStep2Desc && t.step2Desc) lblStep2Desc.innerHTML = t.step2Desc;
-    const lblStep3Title = document.getElementById('lblStep3Title');
-    if (lblStep3Title && t.step3Title) lblStep3Title.textContent = t.step3Title;
-    const lblStep3Desc = document.getElementById('lblStep3Desc');
-    if (lblStep3Desc && t.step3Desc) lblStep3Desc.innerHTML = t.step3Desc;
-    const lblCustomGuideTip = document.getElementById('lblCustomGuideTip');
-    if (lblCustomGuideTip && t.customGuideTip) lblCustomGuideTip.textContent = t.customGuideTip;
-    const btnGuideOpenPresets = document.getElementById('btnGuideOpenPresets');
-    if (btnGuideOpenPresets && t.guidePresetsBtn) btnGuideOpenPresets.textContent = t.guidePresetsBtn;
-
     this.renderHeroPresets();
     this.renderTables();
     this.updateUndoRedoButtons();
-    this.updateCustomDesignGuideVisibility();
   }
 
   setViewMode(mode) {
@@ -632,7 +598,6 @@ export class BeamCalculatorApp {
       this.solution = solver.solve();
       this.renderer.setData(this.beamData, this.solution, this.beamData.currentView);
       this.updateStatusEquilibrium();
-      this.updateCustomDesignGuideVisibility();
       this.renderTables();
 
       // Auto-save model
@@ -1181,19 +1146,6 @@ export class BeamCalculatorApp {
     }
   }
 
-  updateCustomDesignGuideVisibility() {
-    if (!this.customDesignGuideOverlay) {
-      this.customDesignGuideOverlay = document.getElementById('customDesignGuideOverlay');
-    }
-    if (!this.customDesignGuideOverlay) return;
-
-    const isPresetsOpen = this.canvasPresetsOverlay && !this.canvasPresetsOverlay.classList.contains('hidden');
-    if (this.beamData && this.beamData.isBlank && !isPresetsOpen) {
-      this.customDesignGuideOverlay.style.display = 'block';
-    } else {
-      this.customDesignGuideOverlay.style.display = 'none';
-    }
-  }
 
   showToast(message, duration = 3000) {
     if (!this.toastNotification) this.toastNotification = document.getElementById('toastNotification');
