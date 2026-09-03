@@ -4,7 +4,7 @@
  * Smart number formatting (no redundant trailing zeros on canvas, tooltips, and labels).
  */
 
-import { TRANSLATIONS } from './i18n.js?v=1.2.3';
+import { TRANSLATIONS } from './i18n.js?v=1.2.4';
 
 function formatNum(val, maxDec = 2) {
   if (val === null || val === undefined || isNaN(val)) return '-';
