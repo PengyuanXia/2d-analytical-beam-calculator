@@ -7,12 +7,12 @@
  * Popup window dialogs for adding supports, hinges, point loads, and distributed loads.
  */
 
-import { DEFAULT_BEAM } from './constants.js?v=1.2.6';
-import { AnalyticalBeamSolver } from './analyticalSolver.js?v=1.2.6';
-import { BeamRenderer } from './renderer.js?v=1.2.6';
-import { generateStepByStepReport } from './stepByStep.js?v=1.2.6';
-import { PRESETS } from './presets.js?v=1.2.6';
-import { TRANSLATIONS, getSavedLanguage, setSavedLanguage } from './i18n.js?v=1.2.6';
+import { DEFAULT_BEAM } from './constants.js?v=1.2.7';
+import { AnalyticalBeamSolver } from './analyticalSolver.js?v=1.2.7';
+import { BeamRenderer } from './renderer.js?v=1.2.7';
+import { generateStepByStepReport } from './stepByStep.js?v=1.2.7';
+import { PRESETS } from './presets.js?v=1.2.7';
+import { TRANSLATIONS, getSavedLanguage, setSavedLanguage } from './i18n.js?v=1.2.7';
 
 function formatNum(val, maxDec = 2) {
   if (val === null || val === undefined || isNaN(val)) return '-';
@@ -326,6 +326,25 @@ export class BeamCalculatorApp {
       this.btnGuideOpenPresets.addEventListener('click', () => this.showHeroOverlay());
     }
 
+    const btnCloseGuide = document.getElementById('btnCloseGuide');
+    if (btnCloseGuide) {
+      btnCloseGuide.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (this.customDesignGuideOverlay) {
+          this.customDesignGuideOverlay.style.display = 'none';
+        }
+      });
+    }
+
+    const beamCanvas = document.getElementById('beamCanvas');
+    if (beamCanvas) {
+      beamCanvas.addEventListener('mousedown', () => {
+        if (this.customDesignGuideOverlay && this.customDesignGuideOverlay.style.display !== 'none') {
+          this.customDesignGuideOverlay.style.display = 'none';
+        }
+      });
+    }
+
     document.getElementById('btnOpenTemplates').addEventListener('click', () => this.showHeroOverlay());
     document.getElementById('btnCloseTemplatesModal').addEventListener('click', () => this.closeTemplatesModal());
 
@@ -430,8 +449,9 @@ export class BeamCalculatorApp {
       this.inputLength.value = 6.0;
       this.inputEI.value = 1.0;
       this.setViewMode('reactions');
-      this.recalculate(true);
       this.hideHeroOverlay();
+      this.recalculate(true);
+      this.showToast(this.lang === 'pl' ? '✨ Własny projekt: Dodaj podpory i obciążenia w lewym panelu' : '✨ Custom Design: Add supports and loads in the left panel to begin', 3500);
     });
 
     this.heroPresetsGrid.appendChild(blankCard);

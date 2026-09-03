@@ -14,7 +14,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/beam-calculator.css?v=1.2.6">
+  <link rel="stylesheet" href="css/beam-calculator.css?v=1.2.7">
 </head>
 <body>
   <div class="app-container">
@@ -310,10 +310,11 @@
           <div class="custom-guide-card">
             <div class="custom-guide-header">
               <div class="custom-guide-badge">✨</div>
-              <div>
+              <div style="flex: 1;">
                 <h3 class="custom-guide-title" id="lblCustomGuideTitle">How to Build Your Beam</h3>
                 <p class="custom-guide-subtitle" id="lblCustomGuideSubtitle">Get started by defining your parameters and elements in the left panel:</p>
               </div>
+              <button class="btn-icon-del text-base" id="btnCloseGuide" title="Dismiss guide" style="color: #64748b; margin-left: 8px;">✕</button>
             </div>
             
             <div class="custom-guide-steps">
@@ -583,6 +584,6 @@
   <div id="toastNotification" class="toast-notification"></div>
 
   <!-- Main Module -->
-  <script type="module" src="js/ui.js?v=1.2.6"></script>
+  <script type="module" src="js/ui.js?v=1.2.7"></script>
 </body>
 </html>
