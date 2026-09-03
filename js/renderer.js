@@ -379,8 +379,8 @@ export class BeamRenderer {
 
   drawBlankBeamPreview() {
     const beamY = this.height * 0.28 + this.panY;
-    const x0 = this.worldToScreenX(0);
-    const xL = this.worldToScreenX(this.beamData.length || 6.0);
+    const x0 = this.beamToPixelX(0);
+    const xL = this.beamToPixelX(this.beamData.length || 6.0);
     const ctx = this.ctx;
 
     ctx.save();
