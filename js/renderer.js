@@ -4,7 +4,7 @@
  * Smart number formatting (no redundant trailing zeros on canvas, tooltips, and labels).
  */
 
-import { TRANSLATIONS } from './i18n.js?v=1.2.5';
+import { TRANSLATIONS } from './i18n.js?v=1.2.6';
 
 function formatNum(val, maxDec = 2) {
   if (val === null || val === undefined || isNaN(val)) return '-';
@@ -353,7 +353,16 @@ export class BeamRenderer {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.width, this.height);
 
-    if (!this.beamData || !this.solution || this.beamData.isBlank) {
+    if (!this.beamData) {
+      return;
+    }
+
+    if (this.beamData.isBlank) {
+      this.drawBlankBeamPreview();
+      return;
+    }
+
+    if (!this.solution) {
       return;
     }
 
@@ -366,6 +375,61 @@ export class BeamRenderer {
     if (this.solution.isStable && this.cursorX !== null && this.cursorX >= 0 && this.cursorX <= this.beamData.length) {
       this.drawCrosshair(this.cursorX);
     }
+  }
+
+  drawBlankBeamPreview() {
+    const beamY = this.height * 0.28 + this.panY;
+    const x0 = this.worldToScreenX(0);
+    const xL = this.worldToScreenX(this.beamData.length || 6.0);
+    const ctx = this.ctx;
+
+    ctx.save();
+    // 1. Subtle dashed beam axis
+    ctx.strokeStyle = '#93c5fd';
+    ctx.lineWidth = 4;
+    ctx.setLineDash([8, 6]);
+    ctx.beginPath();
+    ctx.moveTo(x0, beamY);
+    ctx.lineTo(xL, beamY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 2. End nodes
+    [x0, xL].forEach((x, i) => {
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(x, beamY, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#475569';
+      ctx.font = 'bold 11px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(i === 0 ? 'x = 0' : `x = ${this.beamData.length}m`, x, beamY - 14);
+    });
+
+    // 3. Dimension line below
+    const dimY = beamY + 36;
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x0, dimY);
+    ctx.lineTo(xL, dimY);
+    // Ticks
+    ctx.moveTo(x0, dimY - 6);
+    ctx.lineTo(x0, dimY + 6);
+    ctx.moveTo(xL, dimY - 6);
+    ctx.lineTo(xL, dimY + 6);
+    ctx.stroke();
+
+    ctx.fillStyle = '#1e40af';
+    ctx.font = 'bold 12px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`L = ${(this.beamData.length || 6.0).toFixed(1)} m`, (x0 + xL) / 2, dimY - 8);
+
+    ctx.restore();
   }
 
   drawSingleDiagramView() {

@@ -54,6 +54,16 @@ export const TRANSLATIONS = {
     blankBeamDesc: 'Start with a clean beam canvas to define your own spans, supports, hinges, and loads from scratch.',
     blankBeamBtn: 'Create from Scratch',
     blankBeamBadge: 'Custom Design',
+    customGuideTitle: 'How to Build Your Beam',
+    customGuideSubtitle: 'Get started by defining your parameters and elements in the left panel:',
+    step1Title: '1. Set Beam Length & Stiffness',
+    step1Desc: 'Enter total length L [m] and flexural rigidity EJ [kN·m²] in the top-left card.',
+    step2Title: '2. Add Supports (Boundary Conditions)',
+    step2Desc: 'Click "+ Add Support" (Pin, Fixed, or Roller) and specify position x [m].',
+    step3Title: '3. Apply Loads & Moments',
+    step3Desc: 'Add point forces Fz [kN], moments M [kNm], or distributed loads q [kN/m].',
+    customGuideTip: '💡 Diagrams for T(x), M(x), and w(x) will calculate automatically!',
+    guidePresetsBtn: '📚 Browse Presets',
     
     // Sidebar
     beamParamsTitle: 'Beam Parameters',
@@ -187,6 +197,16 @@ export const TRANSLATIONS = {
     blankBeamDesc: 'Rozpocznij od czystego płótna belki, aby od podstaw zdefiniować własne przęsła, podpory, przeguby i obciążenia.',
     blankBeamBtn: 'Stwórz od podstaw',
     blankBeamBadge: 'Własny projekt',
+    customGuideTitle: 'Jak zbudować własną belkę',
+    customGuideSubtitle: 'Rozpocznij od zdefiniowania parametrów i elementów w lewym panelu:',
+    step1Title: '1. Ustaw długość i sztywność belki',
+    step1Desc: 'Wpisz długość całkowitą L [m] oraz sztywność EJ [kN·m²] w pierwszej karcie.',
+    step2Title: '2. Dodaj podpory (Warunki brzegowe)',
+    step2Desc: 'Kliknij "+ Dodaj podporę" (Przegub, Utwierdzenie) i podaj położenie x [m].',
+    step3Title: '3. Przyłóż obciążenia i momenty',
+    step3Desc: 'Dodaj siły skupione Fz [kN], momenty M [kNm] lub obciążenia ciągłe q [kN/m].',
+    customGuideTip: '💡 Wykresy T(x), M(x) i ugięć w(x) wyznaczą się automatycznie!',
+    guidePresetsBtn: '📚 Przykłady',
     
     // Sidebar
     beamParamsTitle: 'Parametry belki',

@@ -14,7 +14,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/beam-calculator.css?v=1.2.5">
+  <link rel="stylesheet" href="css/beam-calculator.css?v=1.2.6">
 </head>
 <body>
   <div class="app-container">
@@ -305,6 +305,50 @@
           </button>
         </div>
 
+        <!-- Custom Design Quick Guide Overlay (Visible on blank canvas, hides on user interaction) -->
+        <div class="canvas-custom-guide-overlay" id="customDesignGuideOverlay" style="display: none;">
+          <div class="custom-guide-card">
+            <div class="custom-guide-header">
+              <div class="custom-guide-badge">✨</div>
+              <div>
+                <h3 class="custom-guide-title" id="lblCustomGuideTitle">How to Build Your Beam</h3>
+                <p class="custom-guide-subtitle" id="lblCustomGuideSubtitle">Get started by defining your parameters and elements in the left panel:</p>
+              </div>
+            </div>
+            
+            <div class="custom-guide-steps">
+              <div class="custom-guide-step-item">
+                <div class="step-num-badge">1</div>
+                <div class="step-text-content">
+                  <div class="step-title" id="lblStep1Title">Set Beam Length & Stiffness</div>
+                  <div class="step-desc" id="lblStep1Desc">Enter total length <strong>L [m]</strong> and rigidity <strong>EJ [kN·m²]</strong> in the top-left card.</div>
+                </div>
+              </div>
+
+              <div class="custom-guide-step-item">
+                <div class="step-num-badge">2</div>
+                <div class="step-text-content">
+                  <div class="step-title" id="lblStep2Title">Add Supports (Boundary Conditions)</div>
+                  <div class="step-desc" id="lblStep2Desc">Click <strong>+ Add Support</strong> (Pin, Fixed, or Roller) and specify position <strong>x [m]</strong>.</div>
+                </div>
+              </div>
+
+              <div class="custom-guide-step-item">
+                <div class="step-num-badge">3</div>
+                <div class="step-text-content">
+                  <div class="step-title" id="lblStep3Title">Apply Loads & Moments</div>
+                  <div class="step-desc" id="lblStep3Desc">Add point forces <strong>Fz [kN]</strong>, moments <strong>M [kNm]</strong>, or distributed loads <strong>q [kN/m]</strong>.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="custom-guide-footer">
+              <span class="custom-guide-tip" id="lblCustomGuideTip">💡 Diagrams for T(x), M(x), and w(x) will calculate automatically!</span>
+              <button class="btn-guide-presets" id="btnGuideOpenPresets">📚 Presets</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Canvas Presets Showcase Overlay (Visible on launch & via Presets button) -->
         <div class="canvas-presets-overlay" id="canvasPresetsOverlay">
           <div class="presets-hero-content">
@@ -539,6 +583,6 @@
   <div id="toastNotification" class="toast-notification"></div>
 
   <!-- Main Module -->
-  <script type="module" src="js/ui.js?v=1.2.5"></script>
+  <script type="module" src="js/ui.js?v=1.2.6"></script>
 </body>
 </html>
