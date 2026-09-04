@@ -14,7 +14,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/beam-calculator.css?v=1.2.8">
+  <link rel="stylesheet" href="css/beam-calculator.css?v=1.2.9">
 </head>
 <body>
   <div class="app-container">
@@ -37,7 +37,33 @@
           <button class="menu-btn" id="btnLoadModel" title="Load beam structure from file">📂 Load</button>
           <input type="file" id="inpModelFile" accept=".json" style="display: none;">
           <button class="menu-btn" id="btnShareLink" title="Copy shareable link to clipboard">🔗 Share</button>
-          <button class="menu-btn" id="btnExportPNG">Export PNG</button>
+          
+          <!-- Export PNG Dropdown Container -->
+          <div class="menu-dropdown-container" id="exportDropdownContainer">
+            <button class="menu-btn" id="btnExportPNG" title="Export diagram or exercise problem as PNG">
+              <span id="btnExportPNGText">📷 Export PNG</span>
+              <svg class="dropdown-caret" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="menu-dropdown-menu" id="exportDropdownMenu">
+              <button class="dropdown-item" id="btnExportCanvasPNG">
+                <span class="dropdown-item-icon">📊</span>
+                <div class="dropdown-item-text">
+                  <div class="dropdown-item-title" id="lblExportCurrentTitle">Current Canvas View</div>
+                  <div class="dropdown-item-desc" id="lblExportCurrentDesc">Active diagram with reactions & internal forces</div>
+                </div>
+              </button>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item" id="btnExportExercisePNG">
+                <span class="dropdown-item-icon">🎓</span>
+                <div class="dropdown-item-text">
+                  <div class="dropdown-item-title" id="lblExportExerciseTitle">Unsolved Problem (Student Exercise)</div>
+                  <div class="dropdown-item-desc" id="lblExportExerciseDesc">Clean structure & loads only (for homework/exams)</div>
+                </div>
+              </button>
+            </div>
+          </div>
         </nav>
       </div>
       <div class="user-greeting">
@@ -539,6 +565,6 @@
   <div id="toastNotification" class="toast-notification"></div>
 
   <!-- Main Module -->
-  <script type="module" src="js/ui.js?v=1.2.8"></script>
+  <script type="module" src="js/ui.js?v=1.2.9"></script>
 </body>
 </html>

@@ -7,12 +7,12 @@
  * Popup window dialogs for adding supports, hinges, point loads, and distributed loads.
  */
 
-import { DEFAULT_BEAM } from './constants.js?v=1.2.8';
-import { AnalyticalBeamSolver } from './analyticalSolver.js?v=1.2.8';
-import { BeamRenderer } from './renderer.js?v=1.2.8';
-import { generateStepByStepReport } from './stepByStep.js?v=1.2.8';
-import { PRESETS } from './presets.js?v=1.2.8';
-import { TRANSLATIONS, getSavedLanguage, setSavedLanguage } from './i18n.js?v=1.2.8';
+import { DEFAULT_BEAM } from './constants.js?v=1.2.9';
+import { AnalyticalBeamSolver } from './analyticalSolver.js?v=1.2.9';
+import { BeamRenderer } from './renderer.js?v=1.2.9';
+import { generateStepByStepReport } from './stepByStep.js?v=1.2.9';
+import { PRESETS } from './presets.js?v=1.2.9';
+import { TRANSLATIONS, getSavedLanguage, setSavedLanguage } from './i18n.js?v=1.2.9';
 
 function formatNum(val, maxDec = 2) {
   if (val === null || val === undefined || isNaN(val)) return '-';
@@ -339,8 +339,40 @@ export class BeamCalculatorApp {
     document.getElementById('btnOpenTemplates').addEventListener('click', () => this.showHeroOverlay());
     document.getElementById('btnCloseTemplatesModal').addEventListener('click', () => this.closeTemplatesModal());
 
-    // Export PNG
-    document.getElementById('btnExportPNG').addEventListener('click', () => this.exportPNG());
+    // Export PNG Dropdown
+    const exportDropdownContainer = document.getElementById('exportDropdownContainer');
+    const btnExportPNG = document.getElementById('btnExportPNG');
+    const btnExportCanvasPNG = document.getElementById('btnExportCanvasPNG');
+    const btnExportExercisePNG = document.getElementById('btnExportExercisePNG');
+
+    if (btnExportPNG && exportDropdownContainer) {
+      btnExportPNG.addEventListener('click', (e) => {
+        e.stopPropagation();
+        exportDropdownContainer.classList.toggle('open');
+      });
+    }
+
+    if (btnExportCanvasPNG) {
+      btnExportCanvasPNG.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (exportDropdownContainer) exportDropdownContainer.classList.remove('open');
+        this.exportPNG();
+      });
+    }
+
+    if (btnExportExercisePNG) {
+      btnExportExercisePNG.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (exportDropdownContainer) exportDropdownContainer.classList.remove('open');
+        this.exportStudentExercisePNG();
+      });
+    }
+
+    document.addEventListener('click', (e) => {
+      if (exportDropdownContainer && !exportDropdownContainer.contains(e.target)) {
+        exportDropdownContainer.classList.remove('open');
+      }
+    });
 
     // Keyboard shortcuts: Ctrl+Z (Undo), Ctrl+Y / Ctrl+Shift+Z (Redo), ESC (Close modals/overlay), Enter (Confirm modal)
     window.addEventListener('keydown', (e) => {
@@ -517,7 +549,16 @@ export class BeamCalculatorApp {
     if (this.btnSaveModel) this.btnSaveModel.textContent = t.saveModelBtn;
     if (this.btnLoadModel) this.btnLoadModel.textContent = t.loadModelBtn;
     if (this.btnShareLink) this.btnShareLink.textContent = t.shareBtn;
-    document.getElementById('btnExportPNG').textContent = t.exportPngBtn;
+    const btnExportPNGText = document.getElementById('btnExportPNGText');
+    if (btnExportPNGText && t.exportPngBtn) btnExportPNGText.textContent = t.exportPngBtn;
+    const lblExportCurrentTitle = document.getElementById('lblExportCurrentTitle');
+    if (lblExportCurrentTitle && t.exportCurrentTitle) lblExportCurrentTitle.textContent = t.exportCurrentTitle;
+    const lblExportCurrentDesc = document.getElementById('lblExportCurrentDesc');
+    if (lblExportCurrentDesc && t.exportCurrentDesc) lblExportCurrentDesc.textContent = t.exportCurrentDesc;
+    const lblExportExerciseTitle = document.getElementById('lblExportExerciseTitle');
+    if (lblExportExerciseTitle && t.exportExerciseTitle) lblExportExerciseTitle.textContent = t.exportExerciseTitle;
+    const lblExportExerciseDesc = document.getElementById('lblExportExerciseDesc');
+    if (lblExportExerciseDesc && t.exportExerciseDesc) lblExportExerciseDesc.textContent = t.exportExerciseDesc;
     document.getElementById('btnCalcDetailsText').textContent = t.calcReportBtn;
 
     // Contact Creator & Modal
@@ -1267,10 +1308,453 @@ export class BeamCalculatorApp {
 
   exportPNG() {
     const canvas = document.getElementById('beamCanvas');
+    if (!canvas) return;
     const link = document.createElement('a');
     link.download = `2D_Beam_${this.beamData.currentView}_diagram.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
+    this.showToast(this.t.toastExportCanvasSuccess || '📸 Canvas diagram exported as PNG');
+  }
+
+  exportStudentExercisePNG() {
+    const W = 1400;
+    const H = 700;
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    const isPl = this.lang === 'pl';
+
+    // 1. Clean White Background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, W, H);
+
+    // 2. Header Area
+    ctx.save();
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(0, 0, W, 72);
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(0, 72);
+    ctx.lineTo(W, 72);
+    ctx.stroke();
+
+    // App title badge
+    ctx.fillStyle = '#1e40af';
+    ctx.font = "bold 17px 'Inter', -apple-system, sans-serif";
+    ctx.textAlign = 'left';
+    ctx.fillText(isPl ? '📐 ANALIZA STATYCZNA BELKI — SCHEMAT ZADANIA' : '📐 2D BEAM ANALYSIS — PROBLEM STATEMENT', 40, 35);
+
+    const L = Math.max(0.1, Number(this.beamData.length) || 6.0);
+    const EI = Number(this.beamData.EI) || 1.0;
+    const stiffnessText = Math.abs(EI - 1.0) < 1e-5 ? 'EJ = const' : `EJ = ${formatNum(EI)} kN·m²`;
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = "600 13px 'Inter', -apple-system, sans-serif";
+    ctx.fillText(`${isPl ? 'Długość całkowita' : 'Total Length'}: L = ${formatNum(L)} m   |   ${isPl ? 'Sztywność zginania' : 'Flexural Rigidity'}: ${stiffnessText}`, 40, 58);
+
+    // Watermark in top right
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = "bold 12.5px 'Inter', -apple-system, sans-serif";
+    ctx.textAlign = 'right';
+    ctx.fillText('2D Analytical Beam Calculator • structlab.tech', W - 40, 45);
+    ctx.restore();
+
+    // 3. Coordinate mapping for the beam
+    const padX = 140;
+    const beamW = W - 2 * padX; // 1120px
+    const beamY = 320;
+    const scale = 1.15;
+    const beamToPx = (x) => padX + (Math.max(0, Math.min(L, Number(x) || 0)) / L) * beamW;
+
+    ctx.save();
+
+    // 4. Draw Beam Axis
+    ctx.strokeStyle = '#1e293b';
+    ctx.lineWidth = 8.5 * scale;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(beamToPx(0), beamY);
+    ctx.lineTo(beamToPx(L), beamY);
+    ctx.stroke();
+
+    // Helper: draw arrow
+    const drawArrow = (fromX, fromY, toX, toY, color, headLen = 7 * scale, width = 2.2 * scale) => {
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = width;
+      ctx.beginPath();
+      ctx.moveTo(fromX, fromY);
+      ctx.lineTo(toX, toY);
+      ctx.stroke();
+      const angle = Math.atan2(toY - fromY, toX - fromX);
+      ctx.beginPath();
+      ctx.moveTo(toX, toY);
+      ctx.lineTo(toX - headLen * Math.cos(angle - Math.PI / 6), toY - headLen * Math.sin(angle - Math.PI / 6));
+      ctx.lineTo(toX - headLen * Math.cos(angle + Math.PI / 6), toY - headLen * Math.sin(angle + Math.PI / 6));
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    };
+
+    // Helper: draw moment arc
+    const drawMomentArc = (cx, cy, r, isClockwise, color) => {
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 2.4 * scale;
+      const startAngle = Math.PI * 0.7;
+      const endAngle = Math.PI * 2.1;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, startAngle, endAngle, false);
+      ctx.stroke();
+
+      const tipAngle = isClockwise ? endAngle : startAngle;
+      const tipX = cx + r * Math.cos(tipAngle);
+      const tipY = cy + r * Math.sin(tipAngle);
+      const tangent = tipAngle + (isClockwise ? Math.PI / 2 : -Math.PI / 2);
+      const headLen = 7 * scale;
+
+      ctx.beginPath();
+      ctx.moveTo(tipX, tipY);
+      ctx.lineTo(tipX - headLen * Math.cos(tangent - Math.PI / 6), tipY - headLen * Math.sin(tangent - Math.PI / 6));
+      ctx.lineTo(tipX - headLen * Math.cos(tangent + Math.PI / 6), tipY - headLen * Math.sin(tangent + Math.PI / 6));
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    };
+
+    // 5. Draw Distributed Loads (q)
+    const distLoads = this.beamData.distLoads || [];
+    distLoads.forEach(d => {
+      const px1 = beamToPx(d.x1);
+      const px2 = beamToPx(d.x2);
+      const q1 = Number(d.q1) || 0;
+      const q2 = Number(d.q2) || 0;
+      if (px2 <= px1 || (q1 === 0 && q2 === 0)) return;
+
+      const maxQ = Math.max(Math.abs(q1), Math.abs(q2));
+      const loadH = 44 * scale;
+      const h1 = (q1 / (maxQ || 1)) * loadH;
+      const h2 = (q2 / (maxQ || 1)) * loadH;
+
+      ctx.save();
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2 * scale;
+      ctx.beginPath();
+      ctx.moveTo(px1, beamY - h1);
+      ctx.lineTo(px2, beamY - h2);
+      ctx.stroke();
+
+      const numArrows = Math.max(2, Math.floor((px2 - px1) / (75 * scale)));
+      for (let i = 0; i <= numArrows; i++) {
+        const ratio = i / numArrows;
+        const curX = px1 + ratio * (px2 - px1);
+        const curH = h1 + ratio * (h2 - h1);
+        if (Math.abs(curH) > 4) {
+          drawArrow(curX, beamY - curH, curX, beamY - 4, '#ef4444', 6.5 * scale, 2 * scale);
+        }
+      }
+
+      ctx.fillStyle = '#b91c1c';
+      ctx.font = `bold ${14 * scale}px 'JetBrains Mono', monospace`;
+      ctx.textAlign = 'center';
+      if (Math.abs(q1 - q2) < 1e-4) {
+        ctx.fillText(`q = ${formatNum(q1)} kN/m`, (px1 + px2) / 2, beamY - h1 - 9 * scale);
+      } else {
+        ctx.fillText(`q1 = ${formatNum(q1)}`, px1, beamY - h1 - 9 * scale);
+        ctx.fillText(`q2 = ${formatNum(q2)}`, px2, beamY - h2 - 9 * scale);
+      }
+      ctx.restore();
+    });
+
+    // 6. Draw Supports
+    const supports = this.beamData.supports || [];
+    supports.forEach(s => {
+      const px = beamToPx(s.x);
+      const isFixed = s.fz && s.my;
+      const isPinned = s.fz && !s.my;
+
+      ctx.save();
+      if (isFixed) {
+        const wallW = 18 * scale;
+        const wallH = 52 * scale;
+        const isRight = Math.abs(s.x - L) < 1e-5;
+        const wallX = isRight ? px : px - wallW;
+
+        ctx.fillStyle = '#cbd5e1';
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 2.2 * scale;
+        ctx.fillRect(wallX, beamY - wallH / 2, wallW, wallH);
+        ctx.strokeRect(wallX, beamY - wallH / 2, wallW, wallH);
+
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1.8 * scale;
+        for (let y = beamY - wallH / 2 + 5; y < beamY + wallH / 2; y += 9 * scale) {
+          ctx.beginPath();
+          ctx.moveTo(wallX, y);
+          ctx.lineTo(wallX + wallW, y + 7 * scale);
+          ctx.stroke();
+        }
+      } else if (isPinned) {
+        const triH = 22 * scale;
+        const triW = 18 * scale;
+
+        ctx.fillStyle = '#3b82f6';
+        ctx.strokeStyle = '#1e3a8a';
+        ctx.lineWidth = 1.8 * scale;
+        ctx.beginPath();
+        ctx.moveTo(px, beamY + 4);
+        ctx.lineTo(px - triW / 2, beamY + triH);
+        ctx.lineTo(px + triW / 2, beamY + triH);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(px, beamY + 4, 4 * scale, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 2.2 * scale;
+        ctx.beginPath();
+        ctx.moveTo(px - triW, beamY + triH);
+        ctx.lineTo(px + triW, beamY + triH);
+        ctx.stroke();
+      } else if (s.fz) {
+        // Roller
+        const triH = 18 * scale;
+        const triW = 18 * scale;
+
+        ctx.fillStyle = '#0284c7';
+        ctx.strokeStyle = '#0369a1';
+        ctx.lineWidth = 1.8 * scale;
+        ctx.beginPath();
+        ctx.moveTo(px, beamY + 4);
+        ctx.lineTo(px - triW / 2, beamY + triH);
+        ctx.lineTo(px + triW / 2, beamY + triH);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        const rY = beamY + triH + 4 * scale;
+        ctx.fillStyle = '#64748b';
+        [-5 * scale, 5 * scale].forEach(dx => {
+          ctx.beginPath();
+          ctx.arc(px + dx, rY, 3.5 * scale, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        });
+
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1.8 * scale;
+        ctx.beginPath();
+        ctx.moveTo(px - triW, rY + 5 * scale);
+        ctx.lineTo(px + triW, rY + 5 * scale);
+        ctx.stroke();
+      }
+
+      // Settlement Movement
+      if (Math.abs(s.movement) > 1e-4) {
+        const isDownward = s.movement > 0;
+        const arrowTopY = beamY + 42 * scale;
+        const arrowBottomY = beamY + 66 * scale;
+        const fromY = isDownward ? arrowTopY : arrowBottomY;
+        const toY = isDownward ? arrowBottomY : arrowTopY;
+
+        drawArrow(px, fromY, px, toY, '#7c3aed', 6.5 * scale, 2.2 * scale);
+
+        ctx.fillStyle = '#6d28d9';
+        ctx.font = `bold ${12 * scale}px 'JetBrains Mono', monospace`;
+        ctx.textAlign = 'center';
+        ctx.fillText(`Δ = ${formatNum(Math.abs(s.movement))} m`, px, arrowBottomY + 14 * scale);
+      }
+
+      ctx.restore();
+    });
+
+    // 7. Draw Hinges
+    const hinges = this.beamData.hinges || [];
+    hinges.forEach(h => {
+      const px = beamToPx(h.x);
+      ctx.save();
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#dc2626';
+      ctx.lineWidth = 3 * scale;
+      ctx.beginPath();
+      ctx.arc(px, beamY, 7.5 * scale, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    // 8. Draw Point Loads (Fz & M)
+    const pointLoads = this.beamData.pointLoads || [];
+    pointLoads.forEach(p => {
+      const px = beamToPx(p.x);
+      const fz = Number(p.fz) || 0;
+      const my = Number(p.my) || 0;
+
+      ctx.save();
+      if (Math.abs(fz) > 1e-4) {
+        const arrowLength = 48 * scale;
+        const isDownward = fz > 0;
+        const fromY = isDownward ? beamY - arrowLength : beamY + arrowLength;
+        const toY = isDownward ? beamY - 4 : beamY + 4;
+
+        drawArrow(px, fromY, px, toY, '#dc2626', 8.5 * scale, 3 * scale);
+
+        ctx.fillStyle = '#dc2626';
+        ctx.font = `bold ${14.5 * scale}px 'JetBrains Mono', monospace`;
+        ctx.textAlign = 'center';
+        ctx.fillText(`P = ${formatNum(Math.abs(fz))} kN`, px, isDownward ? fromY - 7 : fromY + 18 * scale);
+      }
+
+      if (Math.abs(my) > 1e-4) {
+        const radius = 20 * scale;
+        const isClockwise = my < 0;
+        drawMomentArc(px, beamY, radius, isClockwise, '#d97706');
+
+        ctx.fillStyle = '#d97706';
+        ctx.font = `bold ${14 * scale}px 'JetBrains Mono', monospace`;
+        ctx.textAlign = 'center';
+        ctx.fillText(`M = ${formatNum(Math.abs(my))} kNm`, px, beamY - radius - 9 * scale);
+      }
+      ctx.restore();
+    });
+
+    // 9. Dimension Chains (Key Student Exercise Feature)
+    const pts = [0, L];
+    supports.forEach(s => pts.push(Number(s.x)));
+    hinges.forEach(h => pts.push(Number(h.x)));
+    pointLoads.forEach(p => pts.push(Number(p.x)));
+    distLoads.forEach(d => {
+      pts.push(Number(d.x1));
+      pts.push(Number(d.x2));
+    });
+
+    pts.sort((a, b) => a - b);
+    const uniquePts = [];
+    pts.forEach(pt => {
+      if (uniquePts.length === 0 || Math.abs(uniquePts[uniquePts.length - 1] - pt) > 0.005) {
+        uniquePts.push(pt);
+      }
+    });
+
+    const hasMultiSegments = uniquePts.length > 2;
+    const dimY1 = beamY + 72 * scale;
+    const dimY2 = hasMultiSegments ? dimY1 + 46 * scale : dimY1;
+
+    ctx.save();
+    // Segment Dimensions Row
+    if (hasMultiSegments) {
+      for (let i = 0; i < uniquePts.length - 1; i++) {
+        const x1 = uniquePts[i];
+        const x2 = uniquePts[i + 1];
+        const p1 = beamToPx(x1);
+        const p2 = beamToPx(x2);
+        const segLen = x2 - x1;
+        if (segLen <= 0.005) continue;
+
+        // Witness lines
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 1.2;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(p1, beamY + 16);
+        ctx.lineTo(p1, dimY1 + 8);
+        ctx.moveTo(p2, beamY + 16);
+        ctx.lineTo(p2, dimY1 + 8);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Dimension line
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(p1, dimY1);
+        ctx.lineTo(p2, dimY1);
+        // Ticks
+        ctx.moveTo(p1, dimY1 - 6);
+        ctx.lineTo(p1, dimY1 + 6);
+        ctx.moveTo(p2, dimY1 - 6);
+        ctx.lineTo(p2, dimY1 + 6);
+        ctx.stroke();
+
+        // Label
+        ctx.fillStyle = '#0f172a';
+        ctx.font = `bold ${13 * scale}px 'JetBrains Mono', monospace`;
+        ctx.textAlign = 'center';
+        ctx.fillText(`${formatNum(segLen)} m`, (p1 + p2) / 2, dimY1 - 6);
+      }
+    }
+
+    // Total Beam Length Row
+    const pStart = beamToPx(0);
+    const pEnd = beamToPx(L);
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(pStart, beamY + 16);
+    ctx.lineTo(pStart, dimY2 + 8);
+    ctx.moveTo(pEnd, beamY + 16);
+    ctx.lineTo(pEnd, dimY2 + 8);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.strokeStyle = '#1e293b';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(pStart, dimY2);
+    ctx.lineTo(pEnd, dimY2);
+    ctx.moveTo(pStart, dimY2 - 8);
+    ctx.lineTo(pStart, dimY2 + 8);
+    ctx.moveTo(pEnd, dimY2 - 8);
+    ctx.lineTo(pEnd, dimY2 + 8);
+    ctx.stroke();
+
+    ctx.fillStyle = '#1e40af';
+    ctx.font = `bold ${14.5 * scale}px 'JetBrains Mono', monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillText(`L = ${formatNum(L)} m`, (pStart + pEnd) / 2, dimY2 + 20 * scale);
+
+    ctx.restore();
+
+    // 10. Student Exercise Task Footer
+    ctx.save();
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(0, H - 54, W, 54);
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(0, H - 54);
+    ctx.lineTo(W, H - 54);
+    ctx.stroke();
+
+    ctx.fillStyle = '#334155';
+    ctx.font = "600 13.5px 'Inter', -apple-system, sans-serif";
+    ctx.textAlign = 'center';
+    ctx.fillText(
+      isPl
+        ? '✍️  Polecenie: Wyznacz reakcje podpór i sporządź wykresy sił wewnętrznych: sił tnących T(x) oraz momentów zginających M(x).'
+        : '✍️  Task: Determine reaction forces and draw internal force diagrams: Shear Force T(x) and Bending Moment M(x).',
+      W / 2,
+      H - 22
+    );
+    ctx.restore();
+
+    // 11. Trigger Download
+    const link = document.createElement('a');
+    link.download = `2D_Beam_Exercise_Problem.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+
+    this.showToast(this.t.toastExportExerciseSuccess || '🎓 Student exercise problem exported as PNG');
   }
 }
 
