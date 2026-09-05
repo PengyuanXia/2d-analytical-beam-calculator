@@ -55,11 +55,10 @@ export const TRANSLATIONS = {
 
     // Share & QR Modal
     shareModalTitle: 'Share Beam Model',
-    shareQrTitle: '📱 Scan with Smartphone',
-    shareQrDesc: 'Instant live access to this beam calculation on mobile browsers.',
+    shareAutoCopied: 'Link copied to clipboard!',
+    shareHint: 'Scan this QR code with any phone camera or share the link to open this beam calculation instantly.',
     downloadQrBtn: '📥 Download QR (.png)',
     shareUrlLabel: 'Direct Shareable Link',
-    socialShareLabel: 'Share to Social Media',
     shareEmailSubject: '2D Beam Calculation Model',
     toastQrDownloadSuccess: '📱 QR code downloaded as PNG',
 
@@ -214,11 +213,10 @@ export const TRANSLATIONS = {
 
     // Share & QR Modal
     shareModalTitle: 'Udostępnij model belki',
-    shareQrTitle: '📱 Zeskanuj smartfonem',
-    shareQrDesc: 'Natychmiastowy dostęp do obliczeń belki na telefonie komórkowym.',
+    shareAutoCopied: 'Link skopiowany do schowka!',
+    shareHint: 'Zeskanuj kod QR aparatem w telefonie lub udostępnij link, aby natychmiast otworzyć obliczenia belki.',
     downloadQrBtn: '📥 Pobierz kod QR (.png)',
     shareUrlLabel: 'Bezpośredni link do modelu',
-    socialShareLabel: 'Udostępnij w mediach społecznościowych',
     shareEmailSubject: 'Model obliczeniowy belki 2D',
     toastQrDownloadSuccess: '📱 Kod QR pobrany jako plik PNG',
 

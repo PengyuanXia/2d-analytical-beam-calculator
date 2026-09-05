@@ -106,12 +106,6 @@ export class BeamCalculatorApp {
     this.inpShareUrl = document.getElementById('inpShareUrl');
     this.btnCopyShareUrl = document.getElementById('btnCopyShareUrl');
     this.btnCopyShareUrlText = document.getElementById('btnCopyShareUrlText');
-    this.btnShareTwitter = document.getElementById('btnShareTwitter');
-    this.btnShareLinkedIn = document.getElementById('btnShareLinkedIn');
-    this.btnShareWhatsApp = document.getElementById('btnShareWhatsApp');
-    this.btnShareFacebook = document.getElementById('btnShareFacebook');
-    this.btnShareReddit = document.getElementById('btnShareReddit');
-    this.btnShareEmail = document.getElementById('btnShareEmail');
 
     // Navigation Buttons
     this.btnUndo = document.getElementById('btnUndo');
@@ -622,16 +616,14 @@ export class BeamCalculatorApp {
     // Share & QR Modal
     const lblShareModalTitle = document.getElementById('lblShareModalTitle');
     if (lblShareModalTitle && t.shareModalTitle) lblShareModalTitle.textContent = t.shareModalTitle;
-    const lblShareQrTitle = document.getElementById('lblShareQrTitle');
-    if (lblShareQrTitle && t.shareQrTitle) lblShareQrTitle.textContent = t.shareQrTitle;
-    const lblShareQrDesc = document.getElementById('lblShareQrDesc');
-    if (lblShareQrDesc && t.shareQrDesc) lblShareQrDesc.textContent = t.shareQrDesc;
+    const lblShareAutoCopiedText = document.getElementById('lblShareAutoCopiedText');
+    if (lblShareAutoCopiedText && t.shareAutoCopied) lblShareAutoCopiedText.textContent = t.shareAutoCopied;
+    const lblShareHint = document.getElementById('lblShareHint');
+    if (lblShareHint && t.shareHint) lblShareHint.textContent = t.shareHint;
     const lblDownloadQrText = document.getElementById('lblDownloadQrText');
     if (lblDownloadQrText && t.downloadQrBtn) lblDownloadQrText.textContent = t.downloadQrBtn;
     const lblShareUrlLabel = document.getElementById('lblShareUrlLabel');
     if (lblShareUrlLabel && t.shareUrlLabel) lblShareUrlLabel.textContent = t.shareUrlLabel;
-    const lblSocialShareLabel = document.getElementById('lblSocialShareLabel');
-    if (lblSocialShareLabel && t.socialShareLabel) lblSocialShareLabel.textContent = t.socialShareLabel;
     if (this.btnCopyShareUrlText && t.copyBtn) this.btnCopyShareUrlText.textContent = t.copyBtn;
     const btnCloseShareModalFooter = document.getElementById('btnCloseShareModalFooter');
     if (btnCloseShareModalFooter && t.closeBtn) btnCloseShareModalFooter.textContent = t.closeBtn;
@@ -1317,6 +1309,17 @@ export class BeamCalculatorApp {
         this.inpShareUrl.value = shareUrl;
       }
 
+      // Automatically copy shareable link to clipboard immediately
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          this.showToast(this.t.toastShareSuccess || '🔗 Link copied to clipboard!');
+        }).catch(() => {
+          this.fallbackCopyLink(shareUrl);
+        });
+      } else {
+        this.fallbackCopyLink(shareUrl);
+      }
+
       // Generate QR Code
       if (this.shareQrCanvas && window.QRious) {
         new QRious({
@@ -1327,31 +1330,7 @@ export class BeamCalculatorApp {
         });
       }
 
-      // Social Share Links
-      const isPl = this.lang === 'pl';
-      const shareText = isPl
-        ? '📐 Sprawdź to obliczenie belki 2D w kalkulatorze statycznym!'
-        : '📐 Check out this 2D Beam structural calculation on Analytical Beam Calculator!';
-
-      if (this.btnShareTwitter) {
-        this.btnShareTwitter.href = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
-      }
-      if (this.btnShareLinkedIn) {
-        this.btnShareLinkedIn.href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
-      }
-      if (this.btnShareWhatsApp) {
-        this.btnShareWhatsApp.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
-      }
-      if (this.btnShareFacebook) {
-        this.btnShareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-      }
-      if (this.btnShareReddit) {
-        this.btnShareReddit.href = `https://reddit.com/submit?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(shareText)}`;
-      }
-      if (this.btnShareEmail) {
-        this.btnShareEmail.href = `mailto:?subject=${encodeURIComponent(this.t.shareEmailSubject || '2D Beam Calculation Model')}&body=${encodeURIComponent(shareText + '\n\n' + shareUrl)}`;
-      }
-
+      // Open Modal
       if (this.modalShare) {
         this.modalShare.classList.add('open');
       }
