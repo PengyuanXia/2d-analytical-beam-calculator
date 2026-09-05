@@ -941,6 +941,210 @@ input[type=number] {
   color: #1d4ed8;
 }
 
+/* Share & QR Code Modal Styles */
+.share-qr-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+  border: 1.5px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.share-qr-wrapper {
+  background: #ffffff;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+#shareQrCanvas {
+  display: block;
+  width: 140px;
+  height: 140px;
+  border-radius: 4px;
+}
+
+.share-qr-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.share-qr-title {
+  font-weight: 800;
+  font-size: 13.5px;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.share-qr-desc {
+  font-size: 11.5px;
+  color: #64748b;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.share-download-btn {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #1e40af;
+  background: #ffffff;
+  border: 1px solid #93c5fd;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.share-download-btn:hover {
+  background: #dbeafe;
+  border-color: #60a5fa;
+  color: #1d4ed8;
+}
+
+.share-section {
+  margin-bottom: 16px;
+}
+
+.share-section:last-child {
+  margin-bottom: 0;
+}
+
+.share-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 6px;
+}
+
+.share-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.share-url-input {
+  flex: 1;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-family: monospace;
+  font-size: 11.5px;
+  color: #1e293b;
+  outline: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.share-url-input:focus {
+  border-color: #3b82f6;
+  background: #ffffff;
+}
+
+.share-copy-btn {
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 7px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s;
+}
+
+.share-copy-btn:hover {
+  background: #1d4ed8;
+}
+
+.social-share-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 480px) {
+  .social-share-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .share-qr-card {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+.social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.social-x {
+  background: #0f172a;
+}
+.social-x:hover {
+  background: #1e293b;
+}
+
+.social-linkedin {
+  background: #0a66c2;
+}
+.social-linkedin:hover {
+  background: #004182;
+}
+
+.social-whatsapp {
+  background: #16a34a;
+}
+.social-whatsapp:hover {
+  background: #15803d;
+}
+
+.social-facebook {
+  background: #1877f2;
+}
+.social-facebook:hover {
+  background: #166fe5;
+}
+
+.social-reddit {
+  background: #ff4500;
+}
+.social-reddit:hover {
+  background: #e03d00;
+}
+
+.social-email {
+  background: #475569;
+}
+.social-email:hover {
+  background: #334155;
+}
+
 /* Watermark background */
 .student-license-watermark {
   position: absolute;

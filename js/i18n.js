@@ -53,6 +53,16 @@ export const TRANSLATIONS = {
     copiedBtn: '✓ Copied!',
     toastEmailCopied: '📋 Email copied to clipboard!',
 
+    // Share & QR Modal
+    shareModalTitle: 'Share Beam Model',
+    shareQrTitle: '📱 Scan with Smartphone',
+    shareQrDesc: 'Instant live access to this beam calculation on mobile browsers.',
+    downloadQrBtn: '📥 Download QR (.png)',
+    shareUrlLabel: 'Direct Shareable Link',
+    socialShareLabel: 'Share to Social Media',
+    shareEmailSubject: '2D Beam Calculation Model',
+    toastQrDownloadSuccess: '📱 QR code downloaded as PNG',
+
     // Hero Welcome Overlay on Canvas
     heroWelcomeTitle: 'Select a Beam Configuration to Start',
     heroWelcomeSubtitle: 'Choose a benchmark template to instantly view reactions, shear force T(x), bending moment M(x), and deflection w(x).',
@@ -201,6 +211,16 @@ export const TRANSLATIONS = {
     copyBtn: '📋 Kopiuj',
     copiedBtn: '✓ Skopiowano!',
     toastEmailCopied: '📋 Adres e-mail skopiowany do schowka!',
+
+    // Share & QR Modal
+    shareModalTitle: 'Udostępnij model belki',
+    shareQrTitle: '📱 Zeskanuj smartfonem',
+    shareQrDesc: 'Natychmiastowy dostęp do obliczeń belki na telefonie komórkowym.',
+    downloadQrBtn: '📥 Pobierz kod QR (.png)',
+    shareUrlLabel: 'Bezpośredni link do modelu',
+    socialShareLabel: 'Udostępnij w mediach społecznościowych',
+    shareEmailSubject: 'Model obliczeniowy belki 2D',
+    toastQrDownloadSuccess: '📱 Kod QR pobrany jako plik PNG',
 
     // Hero Welcome Overlay on Canvas
     heroWelcomeTitle: 'Wybierz schemat belki na start',

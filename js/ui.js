@@ -7,12 +7,12 @@
  * Popup window dialogs for adding supports, hinges, point loads, and distributed loads.
  */
 
-import { DEFAULT_BEAM } from './constants.js?v=1.2.9';
-import { AnalyticalBeamSolver } from './analyticalSolver.js?v=1.2.9';
-import { BeamRenderer } from './renderer.js?v=1.2.9';
-import { generateStepByStepReport } from './stepByStep.js?v=1.2.9';
-import { PRESETS } from './presets.js?v=1.2.9';
-import { TRANSLATIONS, getSavedLanguage, setSavedLanguage } from './i18n.js?v=1.2.9';
+import { DEFAULT_BEAM } from './constants.js?v=1.3.0';
+import { AnalyticalBeamSolver } from './analyticalSolver.js?v=1.3.0';
+import { BeamRenderer } from './renderer.js?v=1.3.0';
+import { generateStepByStepReport } from './stepByStep.js?v=1.3.0';
+import { PRESETS } from './presets.js?v=1.3.0';
+import { TRANSLATIONS, getSavedLanguage, setSavedLanguage } from './i18n.js?v=1.3.0';
 
 function formatNum(val, maxDec = 2) {
   if (val === null || val === undefined || isNaN(val)) return '-';
@@ -96,6 +96,22 @@ export class BeamCalculatorApp {
     this.btnCloseContactModalFooter = document.getElementById('btnCloseContactModalFooter');
     this.btnCopyEmail = document.getElementById('btnCopyEmail');
     this.btnCopyEmailText = document.getElementById('btnCopyEmailText');
+
+    // Share & QR Modal
+    this.modalShare = document.getElementById('modalShare');
+    this.btnCloseShareModal = document.getElementById('btnCloseShareModal');
+    this.btnCloseShareModalFooter = document.getElementById('btnCloseShareModalFooter');
+    this.shareQrCanvas = document.getElementById('shareQrCanvas');
+    this.btnDownloadQr = document.getElementById('btnDownloadQr');
+    this.inpShareUrl = document.getElementById('inpShareUrl');
+    this.btnCopyShareUrl = document.getElementById('btnCopyShareUrl');
+    this.btnCopyShareUrlText = document.getElementById('btnCopyShareUrlText');
+    this.btnShareTwitter = document.getElementById('btnShareTwitter');
+    this.btnShareLinkedIn = document.getElementById('btnShareLinkedIn');
+    this.btnShareWhatsApp = document.getElementById('btnShareWhatsApp');
+    this.btnShareFacebook = document.getElementById('btnShareFacebook');
+    this.btnShareReddit = document.getElementById('btnShareReddit');
+    this.btnShareEmail = document.getElementById('btnShareEmail');
 
     // Navigation Buttons
     this.btnUndo = document.getElementById('btnUndo');
@@ -233,7 +249,7 @@ export class BeamCalculatorApp {
       this.inpModelFile.addEventListener('change', (e) => this.loadModelJSON(e));
     }
     if (this.btnShareLink) {
-      this.btnShareLink.addEventListener('click', () => this.copyShareLink());
+      this.btnShareLink.addEventListener('click', () => this.openShareModal());
     }
 
     const btnResetView = document.getElementById('btnResetCanvasView');
@@ -326,6 +342,25 @@ export class BeamCalculatorApp {
       });
     }
 
+    // Share & QR Modal Listeners
+    if (this.btnCloseShareModal) {
+      this.btnCloseShareModal.addEventListener('click', () => this.closeShareModal());
+    }
+    if (this.btnCloseShareModalFooter) {
+      this.btnCloseShareModalFooter.addEventListener('click', () => this.closeShareModal());
+    }
+    if (this.modalShare) {
+      this.modalShare.addEventListener('click', (e) => {
+        if (e.target === this.modalShare) this.closeShareModal();
+      });
+    }
+    if (this.btnCopyShareUrl) {
+      this.btnCopyShareUrl.addEventListener('click', () => this.copyShareUrlToClipboard());
+    }
+    if (this.btnDownloadQr) {
+      this.btnDownloadQr.addEventListener('click', () => this.downloadQrCode());
+    }
+
     const beamCanvas = document.getElementById('beamCanvas');
     if (beamCanvas) {
       beamCanvas.addEventListener('mousedown', () => {
@@ -389,6 +424,7 @@ export class BeamCalculatorApp {
         this.closeCalcDetailsModal();
         this.closeTemplatesModal();
         this.closeContactModal();
+        this.closeShareModal();
         this.hideHeroOverlay();
       } else if (e.key === 'Enter') {
         if (this.modalAddElement && this.modalAddElement.classList.contains('open')) {
@@ -582,6 +618,23 @@ export class BeamCalculatorApp {
     if (lblContactKofiSub && t.contactKofiSub) lblContactKofiSub.textContent = t.contactKofiSub;
     if (this.btnCopyEmailText && t.copyBtn) this.btnCopyEmailText.textContent = t.copyBtn;
     if (this.btnCloseContactModalFooter && t.closeBtn) this.btnCloseContactModalFooter.textContent = t.closeBtn;
+
+    // Share & QR Modal
+    const lblShareModalTitle = document.getElementById('lblShareModalTitle');
+    if (lblShareModalTitle && t.shareModalTitle) lblShareModalTitle.textContent = t.shareModalTitle;
+    const lblShareQrTitle = document.getElementById('lblShareQrTitle');
+    if (lblShareQrTitle && t.shareQrTitle) lblShareQrTitle.textContent = t.shareQrTitle;
+    const lblShareQrDesc = document.getElementById('lblShareQrDesc');
+    if (lblShareQrDesc && t.shareQrDesc) lblShareQrDesc.textContent = t.shareQrDesc;
+    const lblDownloadQrText = document.getElementById('lblDownloadQrText');
+    if (lblDownloadQrText && t.downloadQrBtn) lblDownloadQrText.textContent = t.downloadQrBtn;
+    const lblShareUrlLabel = document.getElementById('lblShareUrlLabel');
+    if (lblShareUrlLabel && t.shareUrlLabel) lblShareUrlLabel.textContent = t.shareUrlLabel;
+    const lblSocialShareLabel = document.getElementById('lblSocialShareLabel');
+    if (lblSocialShareLabel && t.socialShareLabel) lblSocialShareLabel.textContent = t.socialShareLabel;
+    if (this.btnCopyShareUrlText && t.copyBtn) this.btnCopyShareUrlText.textContent = t.copyBtn;
+    const btnCloseShareModalFooter = document.getElementById('btnCloseShareModalFooter');
+    if (btnCloseShareModalFooter && t.closeBtn) btnCloseShareModalFooter.textContent = t.closeBtn;
 
     // View buttons
     document.querySelector('[data-view="reactions"]').innerHTML = `<span class="radio-dot"></span> ${t.reactionsView}`;
@@ -1245,7 +1298,7 @@ export class BeamCalculatorApp {
     reader.readAsText(file);
   }
 
-  copyShareLink() {
+  openShareModal() {
     try {
       const cleanData = {
         length: this.beamData.length,
@@ -1258,18 +1311,92 @@ export class BeamCalculatorApp {
       };
       const encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(cleanData)))));
       const shareUrl = `${window.location.origin}${window.location.pathname}#model=${encoded}`;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(shareUrl).then(() => {
-          this.showToast(this.t.toastShareSuccess || '🔗 Link copied to clipboard!');
-        }).catch(() => {
-          this.fallbackCopyLink(shareUrl);
+
+      // Populate input URL
+      if (this.inpShareUrl) {
+        this.inpShareUrl.value = shareUrl;
+      }
+
+      // Generate QR Code
+      if (this.shareQrCanvas && window.QRious) {
+        new QRious({
+          element: this.shareQrCanvas,
+          value: shareUrl,
+          size: 280,
+          level: 'M'
         });
-      } else {
-        this.fallbackCopyLink(shareUrl);
+      }
+
+      // Social Share Links
+      const isPl = this.lang === 'pl';
+      const shareText = isPl
+        ? '📐 Sprawdź to obliczenie belki 2D w kalkulatorze statycznym!'
+        : '📐 Check out this 2D Beam structural calculation on Analytical Beam Calculator!';
+
+      if (this.btnShareTwitter) {
+        this.btnShareTwitter.href = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+      }
+      if (this.btnShareLinkedIn) {
+        this.btnShareLinkedIn.href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+      }
+      if (this.btnShareWhatsApp) {
+        this.btnShareWhatsApp.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
+      }
+      if (this.btnShareFacebook) {
+        this.btnShareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+      }
+      if (this.btnShareReddit) {
+        this.btnShareReddit.href = `https://reddit.com/submit?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(shareText)}`;
+      }
+      if (this.btnShareEmail) {
+        this.btnShareEmail.href = `mailto:?subject=${encodeURIComponent(this.t.shareEmailSubject || '2D Beam Calculation Model')}&body=${encodeURIComponent(shareText + '\n\n' + shareUrl)}`;
+      }
+
+      if (this.modalShare) {
+        this.modalShare.classList.add('open');
       }
     } catch (err) {
-      console.error('Error creating share link:', err);
-      this.showToast(this.t.toastShareError || '❌ Failed to copy link.');
+      console.error('Error opening share modal:', err);
+      this.showToast(this.t.toastShareError || '❌ Failed to generate share link.');
+    }
+  }
+
+  closeShareModal() {
+    if (this.modalShare) {
+      this.modalShare.classList.remove('open');
+    }
+  }
+
+  copyShareUrlToClipboard() {
+    if (!this.inpShareUrl) return;
+    const url = this.inpShareUrl.value;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        if (this.btnCopyShareUrlText) {
+          this.btnCopyShareUrlText.textContent = this.t.copiedBtn || '✓ Copied!';
+          setTimeout(() => {
+            if (this.btnCopyShareUrlText) this.btnCopyShareUrlText.textContent = this.t.copyBtn || '📋 Copy';
+          }, 2200);
+        }
+        this.showToast(this.t.toastShareSuccess || '🔗 Link copied to clipboard!');
+      }).catch(() => {
+        this.fallbackCopyLink(url);
+      });
+    } else {
+      this.fallbackCopyLink(url);
+    }
+  }
+
+  downloadQrCode() {
+    if (!this.shareQrCanvas) return;
+    try {
+      const link = document.createElement('a');
+      link.download = `2D_Beam_Model_QRCode.png`;
+      link.href = this.shareQrCanvas.toDataURL('image/png');
+      link.click();
+      this.showToast(this.t.toastQrDownloadSuccess || '📱 QR code downloaded as PNG');
+    } catch (err) {
+      console.error('Error downloading QR code:', err);
     }
   }
 
