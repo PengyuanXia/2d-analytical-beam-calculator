@@ -964,7 +964,7 @@ input[type=number] {
 
 .share-qr-wrapper {
   background: #ffffff;
-  padding: 10px;
+  padding: 8px;
   border-radius: 12px;
   border: 1.5px solid #cbd5e1;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
@@ -975,8 +975,8 @@ input[type=number] {
 
 #shareQrCanvas {
   display: block;
-  width: 140px;
-  height: 140px;
+  width: 180px;
+  height: 180px;
   border-radius: 4px;
 }
 

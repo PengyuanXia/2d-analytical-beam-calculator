@@ -41,12 +41,13 @@ export class BeamCalculatorApp {
     this.applyLanguage();
     
     // Check if a model is encoded in URL hash (#model=...)
-    const loadedFromHash = this.checkUrlHashModel();
-    if (!loadedFromHash) {
-      // Save initial state to undo stack
-      this.saveHistoryState();
-      this.recalculate(false);
-    }
+    this.checkUrlHashModel().then(loadedFromHash => {
+      if (!loadedFromHash) {
+        // Save initial state to undo stack
+        this.saveHistoryState();
+        this.recalculate(false);
+      }
+    });
   }
 
   get t() {
@@ -1290,18 +1291,184 @@ export class BeamCalculatorApp {
     reader.readAsText(file);
   }
 
-  openShareModal() {
-    try {
-      const cleanData = {
-        length: this.beamData.length,
-        EI: this.beamData.EI,
-        supports: this.beamData.supports,
-        hinges: this.beamData.hinges,
-        pointLoads: this.beamData.pointLoads,
-        distLoads: this.beamData.distLoads,
-        currentView: this.beamData.currentView
+  async encodeBeamModel(beamData) {
+    const compact = {
+      L: beamData.length || 6.0
+    };
+    if (beamData.EI !== undefined && beamData.EI !== null && beamData.EI !== 1.0) {
+      compact.EI = beamData.EI;
+    }
+    if (beamData.currentView && beamData.currentView !== 'reactions') {
+      compact.v = beamData.currentView;
+    }
+
+    // Supports: [x, isFixed, movement]
+    if (Array.isArray(beamData.supports) && beamData.supports.length > 0) {
+      compact.s = beamData.supports.map(s => {
+        const isFixed = s.my ? 1 : 0;
+        const row = [Number(s.x) || 0, isFixed];
+        if (s.movement) {
+          row.push(Number(s.movement));
+        }
+        return row;
+      });
+    }
+
+    // Hinges: [x]
+    if (Array.isArray(beamData.hinges) && beamData.hinges.length > 0) {
+      compact.h = beamData.hinges.map(h => Number(h.x) || 0);
+    }
+
+    // Point Loads: [x, fz, my]
+    if (Array.isArray(beamData.pointLoads) && beamData.pointLoads.length > 0) {
+      compact.p = beamData.pointLoads.map(p => {
+        const row = [Number(p.x) || 0, Number(p.fz) || 0];
+        if (p.my) {
+          row.push(Number(p.my));
+        }
+        return row;
+      });
+    }
+
+    // Distributed Loads: [x1, x2, q1, q2]
+    if (Array.isArray(beamData.distLoads) && beamData.distLoads.length > 0) {
+      compact.d = beamData.distLoads.map(d => {
+        const x1 = Number(d.x1 !== undefined ? d.x1 : d.xStart) || 0;
+        const x2 = Number(d.x2 !== undefined ? d.x2 : d.xEnd) || 0;
+        const q1 = Number(d.q1 !== undefined ? d.q1 : d.loadStart) || 0;
+        const q2 = Number(d.q2 !== undefined ? d.q2 : (d.loadEnd !== undefined ? d.loadEnd : q1)) || 0;
+        if (q1 === q2) {
+          return [x1, x2, q1];
+        }
+        return [x1, x2, q1, q2];
+      });
+    }
+
+    const jsonStr = JSON.stringify(compact);
+
+    // Deflate stream compression (Web standard CompressionStream)
+    if (typeof CompressionStream !== 'undefined') {
+      try {
+        const stream = new Blob([jsonStr]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+        const buffer = await new Response(stream).arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        return 'z:' + btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      } catch (err) {
+        console.warn('CompressionStream fallback:', err);
+      }
+    }
+
+    // Fallback: base64 of compact JSON
+    return encodeURIComponent(btoa(unescape(encodeURIComponent(jsonStr))));
+  }
+
+  async decodeBeamModel(encodedStr) {
+    let jsonStr;
+    if (encodedStr.startsWith('z:')) {
+      const b64 = encodedStr.substring(2).replace(/-/g, '+').replace(/_/g, '/');
+      let padded = b64;
+      while (padded.length % 4) padded += '=';
+      const binary = atob(padded);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      jsonStr = await new Response(stream).text();
+    } else {
+      jsonStr = decodeURIComponent(escape(atob(decodeURIComponent(encodedStr))));
+    }
+
+    const obj = JSON.parse(jsonStr);
+
+    // Backward compatibility: If old full schema with `supports` and `length`
+    if (obj && typeof obj.length === 'number' && Array.isArray(obj.supports)) {
+      return obj;
+    }
+
+    // Compact schema:
+    if (obj && (typeof obj.L === 'number' || Array.isArray(obj.s))) {
+      const beam = {
+        length: Number(obj.L) || 6.0,
+        EI: obj.EI !== undefined ? Number(obj.EI) : 1.0,
+        supports: [],
+        hinges: [],
+        pointLoads: [],
+        distLoads: [],
+        currentView: obj.v || 'reactions'
       };
-      const encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(cleanData)))));
+
+      if (Array.isArray(obj.s)) {
+        obj.s.forEach((row, i) => {
+          const x = Number(row[0]) || 0;
+          const isFixed = row[1] === 1 || row[1] === 'fixed' || row[1] === true;
+          const movement = row.length > 2 ? Number(row[2]) : 0;
+          beam.supports.push({
+            id: `s_${i + 1}`,
+            x,
+            fz: true,
+            my: isFixed,
+            movement
+          });
+        });
+      }
+
+      if (Array.isArray(obj.h)) {
+        obj.h.forEach((h, i) => {
+          const x = typeof h === 'number' ? h : Number(h[0] || h.x) || 0;
+          beam.hinges.push({
+            id: `h_${i + 1}`,
+            x,
+            type: 'moment'
+          });
+        });
+      }
+
+      if (Array.isArray(obj.p)) {
+        obj.p.forEach((row, i) => {
+          const x = Number(row[0]) || 0;
+          const fz = Number(row[1]) || 0;
+          const my = row.length > 2 ? Number(row[2]) : 0;
+          beam.pointLoads.push({
+            id: `p_${i + 1}`,
+            x,
+            fz,
+            my,
+            loadCase: 'LC1'
+          });
+        });
+      }
+
+      if (Array.isArray(obj.d)) {
+        obj.d.forEach((row, i) => {
+          const x1 = Number(row[0]) || 0;
+          const x2 = Number(row[1]) || 0;
+          const q1 = Number(row[2]) || 0;
+          const q2 = row.length > 3 ? Number(row[3]) : q1;
+          beam.distLoads.push({
+            id: `d_${i + 1}`,
+            x1,
+            x2,
+            q1,
+            q2,
+            loadCase: 'LC1'
+          });
+        });
+      }
+
+      return beam;
+    }
+
+    return null;
+  }
+
+  async openShareModal() {
+    try {
+      const encoded = await this.encodeBeamModel(this.beamData);
       const shareUrl = `${window.location.origin}${window.location.pathname}#model=${encoded}`;
 
       // Populate input URL
@@ -1320,13 +1487,13 @@ export class BeamCalculatorApp {
         this.fallbackCopyLink(shareUrl);
       }
 
-      // Generate QR Code
+      // Generate QR Code with Low error correction (level: 'L') for large, ultra-clean, easily scannable modules
       if (this.shareQrCanvas && window.QRious) {
         new QRious({
           element: this.shareQrCanvas,
           value: shareUrl,
-          size: 280,
-          level: 'M'
+          size: 360,
+          level: 'L'
         });
       }
 
@@ -1393,13 +1560,12 @@ export class BeamCalculatorApp {
     }
   }
 
-  checkUrlHashModel() {
+  async checkUrlHashModel() {
     const hash = window.location.hash;
     if (hash && hash.startsWith('#model=')) {
       try {
         const encoded = hash.substring(7);
-        const jsonStr = decodeURIComponent(escape(atob(decodeURIComponent(encoded))));
-        const data = JSON.parse(jsonStr);
+        const data = await this.decodeBeamModel(encoded);
         if (data && typeof data.length === 'number' && Array.isArray(data.supports)) {
           this.loadPreset({ data });
           this.hideHeroOverlay();

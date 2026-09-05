@@ -566,7 +566,7 @@
 
   <!-- 8. Interactive Share & QR Code Modal -->
   <div class="modal-overlay" id="modalShare">
-    <div class="modal-content" style="max-width: 540px; padding: 0;">
+    <div class="modal-content" style="max-width: 580px; padding: 0;">
       <div class="modal-header" style="padding: 14px 20px;">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span style="font-size: 18px;">🔗</span>
@@ -582,10 +582,10 @@
           <!-- LEFT COLUMN: QR Code -->
           <div class="share-col-left">
             <div class="share-qr-wrapper">
-              <canvas id="shareQrCanvas" width="140" height="140"></canvas>
+              <canvas id="shareQrCanvas" width="180" height="180"></canvas>
             </div>
             <button class="share-download-btn" id="btnDownloadQr" title="Download QR Code image">
-              <span id="lblDownloadQrText">📥 Download QR</span>
+              <span id="lblDownloadQrText">📥 Download QR (.png)</span>
             </button>
           </div>
 
@@ -626,6 +626,6 @@
   <div id="toastNotification" class="toast-notification"></div>
 
   <!-- Main Module -->
-  <script type="module" src="js/ui.js?v=1.3.1"></script>
+  <script type="module" src="js/ui.js?v=1.3.2"></script>
 </body>
 </html>
