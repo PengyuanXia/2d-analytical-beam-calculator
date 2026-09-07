@@ -568,6 +568,9 @@ export class BeamCalculatorApp {
     if (lblKofiText && t.kofiBtn) lblKofiText.textContent = t.kofiBtn;
     if (btnKofi && t.kofiTitle) btnKofi.title = t.kofiTitle;
 
+    const navBackToHub = document.getElementById('navBackToHub');
+    if (navBackToHub && t.backToHub) navBackToHub.textContent = t.backToHub;
+
     document.getElementById('appMainTitle').textContent = t.appTitle;
     document.getElementById('appGreeting').textContent = t.greeting;
     if (this.btnToggleSidebarNav) this.btnToggleSidebarNav.textContent = t.sidebarToggleBtn;

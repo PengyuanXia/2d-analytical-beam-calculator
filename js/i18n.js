@@ -6,6 +6,7 @@
 
 export const TRANSLATIONS = {
   en: {
+    backToHub: '← Back to Hub',
     appTitle: '2D Analytical Beam Calculator',
     greeting: 'Analytical Euler-Bernoulli Engine',
     sidebarToggleBtn: '☰ Panel',
@@ -164,6 +165,7 @@ export const TRANSLATIONS = {
   },
 
   pl: {
+    backToHub: '← Wróć do Hubu',
     appTitle: '2D Analityczny Kalkulator Belek',
     greeting: 'Mechanika Budowli / Wytrzymałość Materiałów',
     sidebarToggleBtn: '☰ Panel',
