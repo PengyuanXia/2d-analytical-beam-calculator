@@ -9,7 +9,7 @@ import webbrowser
 import os
 import sys
 
-PORT = 8000
+PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 2001
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -20,9 +20,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         super().end_headers()
 
 def run_server():
+    global PORT
     web_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(web_dir)
     
+    socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
         url = f"http://localhost:{PORT}"
         print("=" * 60)
@@ -30,6 +32,7 @@ def run_server():
         print(f"  Running locally at: {url}")
         print("  Press Ctrl+C to stop the server.")
         print("=" * 60)
+        sys.stdout.flush()
         
         # Open in default browser
         try:
