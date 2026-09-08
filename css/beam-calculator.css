@@ -1413,10 +1413,24 @@ input[type=number] {
     background: #ffffff !important;
     font-size: 12pt !important;
   }
-  .app-container, #structlab-universal-bar, .window-title-bar, .top-ribbon, .main-workspace, .status-bar, .canvas-toolbar-overlay, #btnCloseCalcModal, .modal-footer {
+  .app-container,
+  #structlab-universal-bar,
+  .window-title-bar,
+  .top-ribbon,
+  .main-workspace,
+  .status-bar,
+  .canvas-toolbar-overlay,
+  #btnCloseCalcModal,
+  .modal-footer,
+  .modal-overlay:not(#modalCalcDetails),
+  #modalTemplates,
+  #modalAddElement,
+  #modalContact,
+  #modalShare,
+  .toast-notification {
     display: none !important;
   }
-  .modal-overlay {
+  .modal-overlay#modalCalcDetails {
     position: static !important;
     display: block !important;
     opacity: 1 !important;
@@ -1424,18 +1438,27 @@ input[type=number] {
     background: transparent !important;
     padding: 0 !important;
   }
-  .modal-content {
+  .modal-overlay#modalCalcDetails .modal-content {
     width: 100% !important;
     max-width: 100% !important;
     max-height: none !important;
     box-shadow: none !important;
     border: none !important;
     overflow: visible !important;
+    transform: none !important;
   }
-  .modal-body {
+  .modal-overlay#modalCalcDetails .modal-body {
     overflow: visible !important;
     max-height: none !important;
     padding: 0 !important;
+  }
+  .modal-overlay#modalCalcDetails img {
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 240px !important;
+    object-fit: contain !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
   .poly-card, div {
     break-inside: avoid;
