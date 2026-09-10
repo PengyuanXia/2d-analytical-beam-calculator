@@ -323,7 +323,7 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
                   <img src="${shearImg}" alt="Shear Force Diagram" class="max-h-52 w-auto object-contain" />
                 </div>
                 <div class="text-[12px] font-medium text-slate-600 mt-2 font-sans">
-                  ${isPl ? 'Rys. 3: Wykres sił poprzecznych T(x) [kN]' : 'Fig. 3: Shear force diagram T(x) [kN]'}
+                  ${isPl ? 'Rys. 3: T(x) [kN]' : 'Fig. 3: T(x) [kN]'}
                 </div>
               </div>
             ` : ''}
@@ -334,7 +334,7 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
                   <img src="${momentImg}" alt="Bending Moment Diagram" class="max-h-52 w-auto object-contain" />
                 </div>
                 <div class="text-[12px] font-medium text-slate-600 mt-2 font-sans">
-                  ${isPl ? 'Rys. 4: Wykres momentów zginających M(x) [kNm] (włókna rozciągane)' : 'Fig. 4: Bending moment diagram M(x) [kNm] (tension fiber side)'}
+                  ${isPl ? 'Rys. 4: M(x) [kNm] (włókna rozciągane)' : 'Fig. 4: M(x) [kNm] (tension fiber side)'}
                 </div>
               </div>
             ` : ''}
