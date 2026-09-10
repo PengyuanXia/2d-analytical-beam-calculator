@@ -1125,7 +1125,19 @@ export class BeamCalculatorApp {
   /* ---------------- Other Modals ---------------- */
 
   openCalcDetailsModal() {
-    const reportHtml = generateStepByStepReport(this.beamData, this.solution, this.lang);
+    let images = {};
+    try {
+      if (this.renderer && this.renderer.exportPNG) {
+        images.unsolvedImg = this.renderer.exportPNG('unsolved');
+        images.reactionsImg = this.renderer.exportPNG('reactions');
+        images.shearImg = this.renderer.exportPNG('shear');
+        images.momentImg = this.renderer.exportPNG('moment');
+      }
+    } catch (err) {
+      console.warn('Could not generate diagram images for report:', err);
+    }
+
+    const reportHtml = generateStepByStepReport(this.beamData, this.solution, this.lang, images);
     this.modalCalcBody.innerHTML = reportHtml;
     this.modalCalcDetails.classList.add('open');
 

@@ -1173,7 +1173,8 @@ export class BeamRenderer {
 
   exportPNG(type = 'current') {
     const canvas = this.canvas;
-    if (type === 'unsolved') {
+    const specialTypes = ['unsolved', 'reactions', 'shear', 'moment', 'displacement'];
+    if (specialTypes.includes(type)) {
       if (!this.beamData) return canvas.toDataURL('image/png');
 
       const origSolution = this.solution;
@@ -1191,9 +1192,62 @@ export class BeamRenderer {
       // Render clean structure and loads only
       this.ctx.clearRect(0, 0, this.width, this.height);
 
-      // Center the beam vertically in the canvas for clean unsolved exercise problem
-      const beamY = this.height * 0.50;
-      this.drawBeamStructure(beamY, 1.0);
+      if (type === 'unsolved') {
+        const beamY = this.height * 0.50;
+        this.drawBeamStructure(beamY, 1.0);
+      } else if (type === 'reactions') {
+        const beamY = this.height * 0.38;
+        this.drawBeamStructure(beamY, 1.0);
+        this.drawReactionArrowsLower(beamY, 1.0);
+      } else if (type === 'shear') {
+        const diagramY = this.height * 0.50;
+        const diagramHeight = this.height * 0.58;
+        this.drawDiagramCurve(
+          diagramY,
+          diagramHeight,
+          (vals) => vals.T,
+          this.t.shearDiagramTitle || 'T(x) [kN]',
+          'T [kN]',
+          '#2563eb',
+          'rgba(37, 99, 235, 0.22)',
+          'rgba(239, 68, 68, 0.22)',
+          this.solution && this.solution.criticalPoints ? this.solution.criticalPoints.maxV : null,
+          this.solution && this.solution.criticalPoints ? this.solution.criticalPoints.minV : null,
+          true
+        );
+      } else if (type === 'moment') {
+        const diagramY = this.height * 0.50;
+        const diagramHeight = this.height * 0.58;
+        this.drawDiagramCurve(
+          diagramY,
+          diagramHeight,
+          (vals) => vals.M,
+          this.t.momentDiagramTitle || 'M(x) [kNm]',
+          'M [kNm]',
+          '#059669',
+          'rgba(16, 185, 129, 0.25)',
+          'rgba(245, 158, 11, 0.25)',
+          this.solution && this.solution.criticalPoints ? this.solution.criticalPoints.maxM : null,
+          this.solution && this.solution.criticalPoints ? this.solution.criticalPoints.minM : null,
+          true
+        );
+      } else if (type === 'displacement') {
+        const diagramY = this.height * 0.50;
+        const diagramHeight = this.height * 0.58;
+        this.drawDiagramCurve(
+          diagramY,
+          diagramHeight,
+          (vals) => vals.w * 1000,
+          this.t.deflectionDiagramTitle || 'w(x) [mm]',
+          'w [mm]',
+          '#0891b2',
+          'rgba(6, 182, 212, 0.22)',
+          'rgba(14, 165, 233, 0.22)',
+          this.solution && this.solution.criticalPoints ? { val: this.solution.criticalPoints.maxW.val * 1000, x: this.solution.criticalPoints.maxW.x } : null,
+          this.solution && this.solution.criticalPoints ? { val: this.solution.criticalPoints.minW.val * 1000, x: this.solution.criticalPoints.minW.x } : null,
+          true
+        );
+      }
 
       const dataUrl = this.cropCanvas(canvas, 24);
 
