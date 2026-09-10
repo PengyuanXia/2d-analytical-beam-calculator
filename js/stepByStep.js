@@ -208,7 +208,7 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
             <div class="flex justify-center items-center p-2 bg-white rounded border border-slate-100 overflow-hidden">
               <img src="${unsolvedImg}" alt="Structural Scheme" class="max-h-56 sm:max-h-64 w-auto object-contain" />
             </div>
-            <div class="text-[11px] italic text-slate-600 mt-1.5 font-sans">
+            <div class="text-[12px] font-medium text-slate-600 mt-2 font-sans">
               ${isPl ? 'Rys. 1: Schemat statyczny belki — geometria, warunki brzegowe i obciążenia zewnętrzne' : 'Fig. 1: Structural scheme of the beam — geometry, boundary conditions and applied loads'}
             </div>
           </div>
@@ -257,7 +257,7 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
             <div class="flex justify-center items-center p-2 bg-white rounded border border-slate-100 overflow-hidden">
               <img src="${reactionsImg}" alt="Support Reactions Scheme" class="max-h-56 sm:max-h-64 w-auto object-contain" />
             </div>
-            <div class="text-[11px] italic text-slate-600 mt-1.5 font-sans">
+            <div class="text-[12px] font-medium text-slate-600 mt-2 font-sans">
               ${isPl ? 'Rys. 2: Schemat ze wyznaczonymi reakcjami podporowymi i momentami utwierdzenia' : 'Fig. 2: Free-body diagram with calculated support reaction forces and fixed-end moments'}
             </div>
           </div>
@@ -322,7 +322,7 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
                 <div class="flex justify-center items-center p-2 bg-white rounded border border-slate-100 overflow-hidden">
                   <img src="${shearImg}" alt="Shear Force Diagram" class="max-h-52 w-auto object-contain" />
                 </div>
-                <div class="text-[11px] italic text-slate-600 mt-1.5 font-sans">
+                <div class="text-[12px] font-medium text-slate-600 mt-2 font-sans">
                   ${isPl ? 'Rys. 3: Wykres sił poprzecznych T(x) [kN]' : 'Fig. 3: Shear force diagram T(x) [kN]'}
                 </div>
               </div>
@@ -333,7 +333,7 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
                 <div class="flex justify-center items-center p-2 bg-white rounded border border-slate-100 overflow-hidden">
                   <img src="${momentImg}" alt="Bending Moment Diagram" class="max-h-52 w-auto object-contain" />
                 </div>
-                <div class="text-[11px] italic text-slate-600 mt-1.5 font-sans">
+                <div class="text-[12px] font-medium text-slate-600 mt-2 font-sans">
                   ${isPl ? 'Rys. 4: Wykres momentów zginających M(x) [kNm] (włókna rozciągane)' : 'Fig. 4: Bending moment diagram M(x) [kNm] (tension fiber side)'}
                 </div>
               </div>
