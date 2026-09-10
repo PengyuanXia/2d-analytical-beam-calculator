@@ -28,8 +28,9 @@ export class BeamRenderer {
     this.viewMode = 'reactions';
     this.cursorX = null;
     this.lang = 'en';
+    this.isExporting = false;
 
-    this.padding = { left: 105, right: 85, top: 40, bottom: 50 };
+    this.padding = { left: 95, right: 85, top: 40, bottom: 50 };
 
     // Pan & Zoom state for Touch & Mouse navigation
     this.panX = 0;
@@ -429,8 +430,7 @@ export class BeamRenderer {
     const beamY = (isReactionsView ? this.height * 0.30 : this.height * 0.32) + this.panY;
     const diagramY = this.height * 0.72 + this.panY;
     const diagramHeight = this.height * 0.44 * this.zoomFactor;
-    const structScale = Math.max(0.7, Math.min(2.2, this.zoomFactor * 1.12));
-    const diagScale = Math.max(0.7, Math.min(2.0, this.zoomFactor * 1.10));
+    const structScale = Math.max(0.6, Math.min(2.2, this.zoomFactor));
 
     // 1. Draw Structure & Loads
     this.drawBeamStructure(beamY, structScale);
@@ -457,7 +457,7 @@ export class BeamRenderer {
         this.solution.criticalPoints ? this.solution.criticalPoints.maxV : null,
         this.solution.criticalPoints ? this.solution.criticalPoints.minV : null,
         true, // Invert: T > 0 drawn downwards below the x-axis
-        diagScale
+        1.0
       );
     } else if (this.viewMode === 'moment') {
       this.drawDiagramCurve(
@@ -472,7 +472,7 @@ export class BeamRenderer {
         this.solution.criticalPoints ? this.solution.criticalPoints.maxM : null,
         this.solution.criticalPoints ? this.solution.criticalPoints.minM : null,
         true, // Invert: M > 0 drawn downwards
-        diagScale
+        1.0
       );
     } else if (this.viewMode === 'displacement') {
       this.drawDiagramCurve(
@@ -487,7 +487,7 @@ export class BeamRenderer {
         this.solution.criticalPoints ? { val: this.solution.criticalPoints.maxW.val * 1000, x: this.solution.criticalPoints.maxW.x } : null,
         this.solution.criticalPoints ? { val: this.solution.criticalPoints.minW.val * 1000, x: this.solution.criticalPoints.minW.x } : null,
         true, // Invert: w > 0 downwards
-        diagScale
+        1.0
       );
     }
   }
@@ -500,8 +500,7 @@ export class BeamRenderer {
     const momentY = this.padding.top + totalAvailH * 0.65 + this.panY;
     const deflY = this.padding.top + totalAvailH * 0.90 + this.panY;
     const plotHeight = totalAvailH * 0.18 * this.zoomFactor;
-    const structScale = 0.75 * Math.max(0.6, Math.min(2.0, this.zoomFactor));
-    const diagScale = 0.92 * Math.max(0.6, Math.min(2.0, this.zoomFactor));
+    const structScale = 0.72 * Math.max(0.6, Math.min(2.0, this.zoomFactor));
 
     // 1. Structure
     this.drawBeamStructure(beamY, structScale);
@@ -524,7 +523,7 @@ export class BeamRenderer {
       'rgba(37, 99, 235, 0.20)',
       'rgba(239, 68, 68, 0.20)',
       null, null, true,
-      diagScale
+      0.85
     );
 
     // 3. Moment Plot M(x)
@@ -538,7 +537,7 @@ export class BeamRenderer {
       'rgba(16, 185, 129, 0.20)',
       'rgba(245, 158, 11, 0.20)',
       null, null, true,
-      diagScale
+      0.85
     );
 
     // 4. Displacement Plot w(x)
@@ -552,7 +551,7 @@ export class BeamRenderer {
       'rgba(6, 182, 212, 0.20)',
       'rgba(14, 165, 233, 0.20)',
       null, null, true,
-      diagScale
+      0.85
     );
   }
 
@@ -600,9 +599,9 @@ export class BeamRenderer {
     ctx.stroke();
 
     // Dimension Line
-    const dimY = beamY + 50 * scale;
+    const dimY = beamY + (this.isExporting ? 50 * scale : 48 * scale);
     ctx.strokeStyle = '#94a3b8';
-    ctx.lineWidth = 1.6 * scale;
+    ctx.lineWidth = this.isExporting ? 1.6 * scale : 1.5;
     ctx.setLineDash([5 * scale, 4 * scale]);
     ctx.beginPath();
     ctx.moveTo(x0, dimY);
@@ -619,11 +618,13 @@ export class BeamRenderer {
       ctx.stroke();
     });
 
-    // Beam Length Dimension Number - enlarged font size
-    ctx.fillStyle = '#0f172a';
-    ctx.font = `bold ${18.5 * scale}px 'JetBrains Mono', monospace`;
+    // Beam Length Dimension Number (larger for report export, compact for canvas)
+    ctx.fillStyle = this.isExporting ? '#0f172a' : '#1e293b';
+    const dimFontSz = this.isExporting ? 18.5 * scale : 15 * scale;
+    ctx.font = `bold ${dimFontSz}px 'JetBrains Mono', monospace`;
     ctx.textAlign = 'center';
-    ctx.fillText(`L = ${formatNum(this.beamData.length)} m`, (x0 + xL) / 2, dimY + 22 * scale);
+    const dimOffset = this.isExporting ? 22 * scale : 18 * scale;
+    ctx.fillText(`L = ${formatNum(this.beamData.length)} m`, (x0 + xL) / 2, dimY + dimOffset);
 
     // Draw Loads & Supports
     this.drawDistributedLoads(beamY, scale);
@@ -724,23 +725,27 @@ export class BeamRenderer {
       }
 
       ctx.fillStyle = '#0f172a';
-      ctx.font = `bold ${16 * scale}px 'JetBrains Mono', monospace`;
+      const coordFontSz = this.isExporting ? 16 * scale : 13.5 * scale;
+      ctx.font = `bold ${coordFontSz}px 'JetBrains Mono', monospace`;
       ctx.textAlign = 'center';
-      ctx.fillText(`${formatNum(s.x)}m`, px, beamY + 36 * scale);
+      const coordOffset = this.isExporting ? 36 * scale : 34 * scale;
+      ctx.fillText(`${formatNum(s.x)}m`, px, beamY + coordOffset);
 
       if (Math.abs(s.movement) > 1e-4) {
         const isDownward = s.movement > 0;
-        const arrowTopY = beamY + 46 * scale;
-        const arrowBottomY = beamY + 68 * scale;
+        const arrowTopY = beamY + (this.isExporting ? 46 * scale : 44 * scale);
+        const arrowBottomY = beamY + (this.isExporting ? 68 * scale : 66 * scale);
         const fromY = isDownward ? arrowTopY : arrowBottomY;
         const toY = isDownward ? arrowBottomY : arrowTopY;
 
-        this.drawArrow(ctx, px, fromY, px, toY, '#7c3aed', 7 * scale, 2.4 * scale);
+        this.drawArrow(ctx, px, fromY, px, toY, '#7c3aed', (this.isExporting ? 7 : 6.5) * scale, (this.isExporting ? 2.4 : 2.2) * scale);
 
+        const movFontSz = this.isExporting ? 15 * scale : 12 * scale;
         ctx.fillStyle = '#6d28d9';
-        ctx.font = `bold ${15 * scale}px 'JetBrains Mono', monospace`;
+        ctx.font = `bold ${movFontSz}px 'JetBrains Mono', monospace`;
         ctx.textAlign = 'center';
-        ctx.fillText(`${formatNum(Math.abs(s.movement))} m`, px, arrowBottomY + 16 * scale);
+        const movOffset = this.isExporting ? 16 * scale : 14 * scale;
+        ctx.fillText(`${formatNum(Math.abs(s.movement))} m`, px, arrowBottomY + movOffset);
       }
 
       ctx.restore();
@@ -804,14 +809,16 @@ export class BeamRenderer {
         }
       }
 
+      const qFontSz = this.isExporting ? 17 * scale : 14 * scale;
       ctx.fillStyle = '#b91c1c';
-      ctx.font = `bold ${17 * scale}px 'JetBrains Mono', monospace`;
+      ctx.font = `bold ${qFontSz}px 'JetBrains Mono', monospace`;
       ctx.textAlign = 'center';
+      const qOffset = this.isExporting ? 9 * scale : 8 * scale;
       if (Math.abs(q1 - q2) < 1e-4) {
-        ctx.fillText(`q = ${formatNum(q1)} kN/m`, (px1 + px2) / 2, beamY - h1 - 9 * scale);
+        ctx.fillText(`q = ${formatNum(q1)} kN/m`, (px1 + px2) / 2, beamY - h1 - qOffset);
       } else {
-        ctx.fillText(`q1 = ${formatNum(q1)}`, px1, beamY - h1 - 9 * scale);
-        ctx.fillText(`q2 = ${formatNum(q2)}`, px2, beamY - h2 - 9 * scale);
+        ctx.fillText(`q1 = ${formatNum(q1)}`, px1, beamY - h1 - qOffset);
+        ctx.fillText(`q2 = ${formatNum(q2)}`, px2, beamY - h2 - qOffset);
       }
 
       ctx.restore();
@@ -829,28 +836,34 @@ export class BeamRenderer {
 
       ctx.save();
       if (Math.abs(fz) > 1e-4) {
-        const arrowLength = 46 * scale;
+        const arrowLength = (this.isExporting ? 46 : 44) * scale;
         const isDownward = fz > 0;
         const fromY = isDownward ? beamY - arrowLength : beamY + arrowLength;
         const toY = isDownward ? beamY - 4 : beamY + 4;
 
-        this.drawArrow(ctx, px, fromY, px, toY, '#dc2626', 8.5 * scale, 3 * scale);
+        this.drawArrow(ctx, px, fromY, px, toY, '#dc2626', (this.isExporting ? 8.5 : 8) * scale, 3 * scale);
 
+        const pFontSz = this.isExporting ? 17.5 * scale : 14.5 * scale;
         ctx.fillStyle = '#dc2626';
-        ctx.font = `bold ${17.5 * scale}px 'JetBrains Mono', monospace`;
+        ctx.font = `bold ${pFontSz}px 'JetBrains Mono', monospace`;
         ctx.textAlign = 'center';
-        ctx.fillText(`P = ${formatNum(Math.abs(fz))} kN`, px, isDownward ? fromY - 8 * scale : fromY + 18 * scale);
+        const pOffset = isDownward 
+          ? (this.isExporting ? fromY - 8 * scale : fromY - 6) 
+          : (this.isExporting ? fromY + 18 * scale : fromY + 16 * scale);
+        ctx.fillText(`P = ${formatNum(Math.abs(fz))} kN`, px, pOffset);
       }
 
       if (Math.abs(my) > 1e-4) {
-        const radius = 20 * scale;
+        const radius = (this.isExporting ? 20 : 18) * scale;
         const isClockwise = my < 0;
         this.drawMomentArc(ctx, px, beamY, radius, isClockwise, '#d97706', scale);
 
+        const mFontSz = this.isExporting ? 17 * scale : 14 * scale;
         ctx.fillStyle = '#d97706';
-        ctx.font = `bold ${17 * scale}px 'JetBrains Mono', monospace`;
+        ctx.font = `bold ${mFontSz}px 'JetBrains Mono', monospace`;
         ctx.textAlign = 'center';
-        ctx.fillText(`M = ${formatNum(Math.abs(my))} kNm`, px, beamY - radius - 9 * scale);
+        const mOffset = this.isExporting ? 9 * scale : 8 * scale;
+        ctx.fillText(`M = ${formatNum(Math.abs(my))} kNm`, px, beamY - radius - mOffset);
       }
 
       ctx.restore();
@@ -864,7 +877,7 @@ export class BeamRenderer {
     const rFz = this.solution.reactions.fz || {};
     const rMy = this.solution.reactions.my || {};
 
-    const dimY = beamY + 50 * scale;
+    const dimY = beamY + (this.isExporting ? 50 * scale : 48 * scale);
     const arrowTopY = dimY + 30 * scale;
     const arrowBottomY = dimY + 68 * scale;
 
@@ -877,12 +890,13 @@ export class BeamRenderer {
         const fromY = isUpward ? arrowBottomY : arrowTopY;
         const toY = isUpward ? arrowTopY : arrowBottomY;
 
-        this.drawArrow(ctx, px, fromY, px, toY, '#16a34a', 8.5 * scale, 3.2 * scale);
+        this.drawArrow(ctx, px, fromY, px, toY, '#16a34a', (this.isExporting ? 8.5 : 8) * scale, 3.2 * scale);
 
+        const rzFontSz = this.isExporting ? 17 * scale : 14 * scale;
         ctx.fillStyle = '#15803d';
-        ctx.font = `bold ${17 * scale}px 'JetBrains Mono', monospace`;
+        ctx.font = `bold ${rzFontSz}px 'JetBrains Mono', monospace`;
         ctx.textAlign = 'center';
-        const labelY = arrowBottomY + 18 * scale;
+        const labelY = arrowBottomY + (this.isExporting ? 18 * scale : 16 * scale);
         ctx.fillText(`Rz = ${formatNum(val)} kN`, px, labelY);
       }
     }
@@ -891,14 +905,16 @@ export class BeamRenderer {
       const x = Number(xStr);
       const px = this.beamToPixelX(x);
       if (Math.abs(val) > 1e-3) {
-        const radius = 22 * scale;
+        const radius = (this.isExporting ? 22 : 20) * scale;
         const isClockwise = val < 0;
         this.drawMomentArc(ctx, px, beamY, radius, isClockwise, '#047857', scale);
 
+        const mrFontSz = this.isExporting ? 16.5 * scale : 13.5 * scale;
         ctx.fillStyle = '#047857';
-        ctx.font = `bold ${16.5 * scale}px 'JetBrains Mono', monospace`;
+        ctx.font = `bold ${mrFontSz}px 'JetBrains Mono', monospace`;
         ctx.textAlign = 'center';
-        ctx.fillText(`MR = ${formatNum(val)} kNm`, px, beamY - radius - 10 * scale);
+        const mrOffset = this.isExporting ? 10 * scale : 9 * scale;
+        ctx.fillText(`MR = ${formatNum(val)} kNm`, px, beamY - radius - mrOffset);
       }
     }
 
@@ -943,58 +959,58 @@ export class BeamRenderer {
     const ctx = this.ctx;
     const x0 = this.beamToPixelX(0);
     const xL = this.beamToPixelX(this.beamData.length);
-    const axisExtend = 36 * scale;
+    const axisExtend = this.isExporting ? 36 * scale : 32;
 
     ctx.save();
 
     // 1. Horizontal X-Axis with Arrow
     ctx.strokeStyle = '#64748b';
-    ctx.lineWidth = 1.8 * scale;
+    ctx.lineWidth = this.isExporting ? 1.8 * scale : 1.6;
     ctx.beginPath();
-    ctx.moveTo(x0 - 15 * scale, baseY);
+    ctx.moveTo(x0 - 15, baseY);
     ctx.lineTo(xL + axisExtend, baseY);
     ctx.stroke();
 
     // X-Axis Arrow Tip
-    this.drawArrow(ctx, xL + axisExtend - 10 * scale, baseY, xL + axisExtend, baseY, '#64748b', 8 * scale, 2.2 * scale);
+    this.drawArrow(ctx, xL + axisExtend - (this.isExporting ? 10 * scale : 10), baseY, xL + axisExtend, baseY, '#64748b', this.isExporting ? 8 * scale : 7, 2);
 
     // X-Axis Label: "x [m]"
     ctx.fillStyle = '#475569';
-    ctx.font = `bold ${16 * scale}px "JetBrains Mono", monospace`;
+    ctx.font = this.isExporting ? `bold ${16 * scale}px "JetBrains Mono", monospace` : 'bold 12.5px "JetBrains Mono", monospace';
     ctx.textAlign = 'left';
-    ctx.fillText('x [m]', xL + axisExtend + 8 * scale, baseY + 5 * scale);
+    ctx.fillText('x [m]', xL + axisExtend + (this.isExporting ? 8 * scale : 6), baseY + 4);
 
     // Origin Tick & End Tick
-    ctx.font = `bold ${15 * scale}px "JetBrains Mono", monospace`;
+    ctx.font = this.isExporting ? `bold ${15 * scale}px "JetBrains Mono", monospace` : '11px "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('0', x0, baseY + 18 * scale);
-    ctx.fillText(`${formatNum(this.beamData.length)}m`, xL, baseY + 18 * scale);
+    ctx.fillText('0', x0, baseY + (this.isExporting ? 18 * scale : 14));
+    ctx.fillText(`${formatNum(this.beamData.length)}m`, xL, baseY + (this.isExporting ? 18 * scale : 14));
 
     // 2. Vertical Coordinate Axis at x = 0
-    const vAxisLen = maxH * 0.52 + 12 * scale;
+    const vAxisLen = maxH * 0.52 + (this.isExporting ? 12 * scale : 10);
     const vArrowToY = invert ? baseY + vAxisLen : baseY - vAxisLen;
 
     ctx.strokeStyle = '#64748b';
-    ctx.lineWidth = 1.8 * scale;
+    ctx.lineWidth = this.isExporting ? 1.8 * scale : 1.5;
     ctx.beginPath();
-    ctx.moveTo(x0, baseY - (invert ? 10 * scale : 0));
+    ctx.moveTo(x0, baseY - (invert ? 10 : 0));
     ctx.lineTo(x0, vArrowToY);
     ctx.stroke();
 
     // Vertical Axis Arrow Tip
-    this.drawArrow(ctx, x0, vArrowToY + (invert ? -8 * scale : 8 * scale), x0, vArrowToY, '#64748b', 8 * scale, 2.2 * scale);
+    this.drawArrow(ctx, x0, vArrowToY + (invert ? -8 : 8), x0, vArrowToY, '#64748b', this.isExporting ? 8 * scale : 7, 2);
 
     // Vertical Axis Label (e.g. T [kN], M [kNm], w [mm]) - no '+' prefix
     ctx.fillStyle = strokeColor;
-    ctx.font = `bold ${16 * scale}px "JetBrains Mono", monospace`;
+    ctx.font = this.isExporting ? `bold ${16 * scale}px "JetBrains Mono", monospace` : 'bold 12.5px "JetBrains Mono", monospace';
     ctx.textAlign = 'right';
-    ctx.fillText(vertAxisLabel, x0 - 10 * scale, vArrowToY + (invert ? 5 * scale : -5 * scale));
+    ctx.fillText(vertAxisLabel, x0 - (this.isExporting ? 10 * scale : 10), vArrowToY + (invert ? 4 : -4));
 
     // 3. Diagram Title Header
     ctx.fillStyle = '#0f172a';
-    ctx.font = `bold ${18 * scale}px Inter, sans-serif`;
+    ctx.font = this.isExporting ? `bold ${18 * scale}px Inter, sans-serif` : 'bold 14.5px Inter, sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText(label, this.padding.left + 8 + this.panX, baseY - maxH / 2 - 16 * scale);
+    ctx.fillText(label, this.padding.left + 8 + this.panX, baseY - maxH / 2 - (this.isExporting ? 16 * scale : 14));
 
     // 4. Sample and Draw Curve & Shaded Region
     const numSamples = Math.max(120, Math.floor(this.width * 0.6));
@@ -1014,7 +1030,7 @@ export class BeamRenderer {
     const valueScale = (maxH * 0.44) / (absMaxVal || 1);
     const dir = invert ? -1 : 1;
 
-    ctx.lineWidth = 2.6 * scale;
+    ctx.lineWidth = this.isExporting ? 2.6 * scale : 2.4;
     ctx.strokeStyle = strokeColor;
     ctx.fillStyle = fillColorPos;
 
@@ -1056,28 +1072,34 @@ export class BeamRenderer {
           const pz = this.beamToPixelX(z.x);
           ctx.fillStyle = '#0f172a';
           ctx.beginPath();
-          ctx.arc(pz, baseY, 4.5 * scale, 0, Math.PI * 2);
+          ctx.arc(pz, baseY, this.isExporting ? 4.5 * scale : 4, 0, Math.PI * 2);
           ctx.fill();
 
-          const zText = `x=${formatNum(z.x)}`;
-          const zFontSize = Math.round(15 * scale);
-          ctx.font = `bold ${zFontSize}px "JetBrains Mono", monospace`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
+          if (this.isExporting) {
+            const zText = `x=${formatNum(z.x)}`;
+            const zFontSize = Math.round(15 * scale);
+            ctx.font = `bold ${zFontSize}px "JetBrains Mono", monospace`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
 
-          const m = ctx.measureText(zText);
-          const bW = m.width + 10 * scale;
-          const bH = zFontSize + 6 * scale;
-          const bY = baseY + 16 * scale + bH / 2;
+            const m = ctx.measureText(zText);
+            const bW = m.width + 10 * scale;
+            const bH = zFontSize + 6 * scale;
+            const bY = baseY + 16 * scale + bH / 2;
 
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(pz - bW / 2, bY - bH / 2, bW, bH);
-          ctx.strokeStyle = '#475569';
-          ctx.lineWidth = 1.3 * scale;
-          ctx.strokeRect(pz - bW / 2, bY - bH / 2, bW, bH);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(pz - bW / 2, bY - bH / 2, bW, bH);
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 1.3 * scale;
+            ctx.strokeRect(pz - bW / 2, bY - bH / 2, bW, bH);
 
-          ctx.fillStyle = '#0f172a';
-          ctx.fillText(zText, pz, bY);
+            ctx.fillStyle = '#0f172a';
+            ctx.fillText(zText, pz, bY);
+          } else {
+            ctx.font = 'bold 12px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(`x=${formatNum(z.x)}`, pz, baseY + 16);
+          }
         }
       });
     }
@@ -1088,8 +1110,8 @@ export class BeamRenderer {
   drawPeakMarker(ctx, px, py, baseY, labelText, color, isTop, scale = 1.0) {
     ctx.save();
     ctx.strokeStyle = color;
-    ctx.lineWidth = 1.6 * scale;
-    ctx.setLineDash([4 * scale, 3 * scale]);
+    ctx.lineWidth = this.isExporting ? 1.6 * scale : 1.4;
+    ctx.setLineDash([4, 3]);
     ctx.beginPath();
     ctx.moveTo(px, baseY);
     ctx.lineTo(px, py);
@@ -1098,28 +1120,36 @@ export class BeamRenderer {
 
     ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.arc(px, py, 4.5 * scale, 0, Math.PI * 2);
+    ctx.arc(px, py, 4.5, 0, Math.PI * 2);
     ctx.fill();
 
-    const fontSize = Math.round(16 * scale);
-    ctx.font = `bold ${fontSize}px "JetBrains Mono", monospace`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    if (this.isExporting) {
+      const fontSize = Math.round(16 * scale);
+      ctx.font = `bold ${fontSize}px "JetBrains Mono", monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
 
-    const metrics = ctx.measureText(labelText);
-    const boxW = Math.max(metrics.width + 12 * scale, 32 * scale);
-    const boxH = fontSize + 8 * scale;
-    const tagY = py + (isTop ? -(boxH / 2 + 5 * scale) : (boxH / 2 + 5 * scale));
+      const metrics = ctx.measureText(labelText);
+      const boxW = Math.max(metrics.width + 12 * scale, 32 * scale);
+      const boxH = fontSize + 8 * scale;
+      const tagY = py + (isTop ? -(boxH / 2 + 5 * scale) : (boxH / 2 + 5 * scale));
 
-    // Crisp white badge background with colored border
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(px - boxW / 2, tagY - boxH / 2, boxW, boxH);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.4 * scale;
-    ctx.strokeRect(px - boxW / 2, tagY - boxH / 2, boxW, boxH);
+      // Crisp white badge background with colored border
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(px - boxW / 2, tagY - boxH / 2, boxW, boxH);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.4 * scale;
+      ctx.strokeRect(px - boxW / 2, tagY - boxH / 2, boxW, boxH);
 
-    ctx.fillStyle = color;
-    ctx.fillText(labelText, px, tagY);
+      ctx.fillStyle = color;
+      ctx.fillText(labelText, px, tagY);
+    } else {
+      ctx.font = 'bold 13.5px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      const tagY = py + (isTop ? -8 : 18);
+      ctx.fillText(labelText, px, tagY);
+    }
+
     ctx.restore();
   }
 
@@ -1223,8 +1253,8 @@ export class BeamRenderer {
     if (specialTypes.includes(type)) {
       if (!this.beamData) return canvas.toDataURL('image/png');
 
-      const expWidth = 760;
-      const expHeight = 380;
+      const expWidth = 900;
+      const expHeight = 420;
       const dpr = 2.0; // 2x sharp Retina / Print export resolution
 
       const exportCanvas = document.createElement('canvas');
@@ -1242,90 +1272,94 @@ export class BeamRenderer {
       const origPanX = this.panX;
       const origPanY = this.panY;
       const origZoom = this.zoomFactor;
+      const origExporting = this.isExporting;
 
-      // Set temporary state for isolated clean export
-      this.ctx = expCtx;
-      this.width = expWidth;
-      this.height = expHeight;
-      this.padding = { left: 105, right: 85, top: 40, bottom: 45 };
-      this.panX = 0;
-      this.panY = 0;
-      this.zoomFactor = 1.0;
+      try {
+        this.isExporting = true;
+        // Set temporary state for isolated clean export
+        this.ctx = expCtx;
+        this.width = expWidth;
+        this.height = expHeight;
+        this.padding = { left: 155, right: 135, top: 48, bottom: 52 };
+        this.panX = 0;
+        this.panY = 0;
+        this.zoomFactor = 1.0;
 
-      const exportScale = 1.45;
+        const exportScale = 1.45;
 
-      if (type === 'unsolved') {
-        const beamY = expHeight * 0.48;
-        this.drawBeamStructure(beamY, exportScale);
-      } else if (type === 'reactions') {
-        const beamY = expHeight * 0.35;
-        this.drawBeamStructure(beamY, exportScale);
-        this.drawReactionArrowsLower(beamY, exportScale);
-      } else if (type === 'shear') {
-        const diagramY = expHeight * 0.50;
-        const diagramHeight = expHeight * 0.56;
-        this.drawDiagramCurve(
-          diagramY,
-          diagramHeight,
-          (vals) => vals.T,
-          this.t.shearDiagramTitle || 'T(x) [kN]',
-          'T [kN]',
-          '#2563eb',
-          'rgba(37, 99, 235, 0.22)',
-          'rgba(239, 68, 68, 0.22)',
-          this.solution && this.solution.criticalPoints ? this.solution.criticalPoints.maxV : null,
-          this.solution && this.solution.criticalPoints ? this.solution.criticalPoints.minV : null,
-          true,
-          exportScale
-        );
-      } else if (type === 'moment') {
-        const diagramY = expHeight * 0.50;
-        const diagramHeight = expHeight * 0.56;
-        this.drawDiagramCurve(
-          diagramY,
-          diagramHeight,
-          (vals) => vals.M,
-          this.t.momentDiagramTitle || 'M(x) [kNm]',
-          'M [kNm]',
-          '#059669',
-          'rgba(16, 185, 129, 0.25)',
-          'rgba(245, 158, 11, 0.25)',
-          this.solution && this.solution.criticalPoints ? this.solution.criticalPoints.maxM : null,
-          this.solution && this.solution.criticalPoints ? this.solution.criticalPoints.minM : null,
-          true,
-          exportScale
-        );
-      } else if (type === 'displacement') {
-        const diagramY = expHeight * 0.50;
-        const diagramHeight = expHeight * 0.56;
-        this.drawDiagramCurve(
-          diagramY,
-          diagramHeight,
-          (vals) => vals.w * 1000,
-          this.t.deflectionDiagramTitle || 'w(x) [mm]',
-          'w [mm]',
-          '#0891b2',
-          'rgba(6, 182, 212, 0.22)',
-          'rgba(14, 165, 233, 0.22)',
-          this.solution && this.solution.criticalPoints ? { val: this.solution.criticalPoints.maxW.val * 1000, x: this.solution.criticalPoints.maxW.x } : null,
-          this.solution && this.solution.criticalPoints ? { val: this.solution.criticalPoints.minW.val * 1000, x: this.solution.criticalPoints.minW.x } : null,
-          true,
-          exportScale
-        );
+        if (type === 'unsolved') {
+          const beamY = expHeight * 0.48;
+          this.drawBeamStructure(beamY, exportScale);
+        } else if (type === 'reactions') {
+          const beamY = expHeight * 0.35;
+          this.drawBeamStructure(beamY, exportScale);
+          this.drawReactionArrowsLower(beamY, exportScale);
+        } else if (type === 'shear') {
+          const diagramY = expHeight * 0.50;
+          const diagramHeight = expHeight * 0.56;
+          this.drawDiagramCurve(
+            diagramY,
+            diagramHeight,
+            (vals) => vals.T,
+            this.t.shearDiagramTitle || 'T(x) [kN]',
+            'T [kN]',
+            '#2563eb',
+            'rgba(37, 99, 235, 0.22)',
+            'rgba(239, 68, 68, 0.22)',
+            this.solution && this.solution.criticalPoints ? this.solution.criticalPoints.maxV : null,
+            this.solution && this.solution.criticalPoints ? this.solution.criticalPoints.minV : null,
+            true,
+            exportScale
+          );
+        } else if (type === 'moment') {
+          const diagramY = expHeight * 0.50;
+          const diagramHeight = expHeight * 0.56;
+          this.drawDiagramCurve(
+            diagramY,
+            diagramHeight,
+            (vals) => vals.M,
+            this.t.momentDiagramTitle || 'M(x) [kNm]',
+            'M [kNm]',
+            '#059669',
+            'rgba(16, 185, 129, 0.25)',
+            'rgba(245, 158, 11, 0.25)',
+            this.solution && this.solution.criticalPoints ? this.solution.criticalPoints.maxM : null,
+            this.solution && this.solution.criticalPoints ? this.solution.criticalPoints.minM : null,
+            true,
+            exportScale
+          );
+        } else if (type === 'displacement') {
+          const diagramY = expHeight * 0.50;
+          const diagramHeight = expHeight * 0.56;
+          this.drawDiagramCurve(
+            diagramY,
+            diagramHeight,
+            (vals) => vals.w * 1000,
+            this.t.deflectionDiagramTitle || 'w(x) [mm]',
+            'w [mm]',
+            '#0891b2',
+            'rgba(6, 182, 212, 0.22)',
+            'rgba(14, 165, 233, 0.22)',
+            this.solution && this.solution.criticalPoints ? { val: this.solution.criticalPoints.maxW.val * 1000, x: this.solution.criticalPoints.maxW.x } : null,
+            this.solution && this.solution.criticalPoints ? { val: this.solution.criticalPoints.minW.val * 1000, x: this.solution.criticalPoints.minW.x } : null,
+            true,
+            exportScale
+          );
+        }
+
+        const dataUrl = this.cropCanvas(exportCanvas, 28);
+        return dataUrl;
+      } finally {
+        // Restore renderer state
+        this.ctx = origCtx;
+        this.width = origWidth;
+        this.height = origHeight;
+        this.padding = origPad;
+        this.panX = origPanX;
+        this.panY = origPanY;
+        this.zoomFactor = origZoom;
+        this.isExporting = origExporting;
       }
-
-      const dataUrl = this.cropCanvas(exportCanvas, 28);
-
-      // Restore renderer state
-      this.ctx = origCtx;
-      this.width = origWidth;
-      this.height = origHeight;
-      this.padding = origPad;
-      this.panX = origPanX;
-      this.panY = origPanY;
-      this.zoomFactor = origZoom;
-
-      return dataUrl;
     } else {
       this.draw();
       const off = document.createElement('canvas');
