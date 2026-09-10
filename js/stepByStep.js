@@ -91,12 +91,12 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
 
     reactionsTableRows += `
       <tr class="hover:bg-slate-50 transition-colors">
-        <td class="p-2.5 border text-center font-bold text-slate-800 font-sans text-xs sm:text-sm">${isPl ? 'Węzeł' : 'Node'} ${nodeLabel}</td>
+        <td class="p-2.5 border text-center font-bold text-slate-800 font-sans text-xs sm:text-sm whitespace-nowrap">${isPl ? 'Węzeł' : 'Node'} ${nodeLabel}</td>
         <td class="p-2.5 border text-center font-sans text-slate-600 text-xs sm:text-[13px]">${sType}</td>
-        <td class="p-2.5 border text-center font-mono font-bold text-slate-700 text-xs sm:text-sm">${formatNum(s.x)} m</td>
-        <td class="p-2.5 border text-center font-mono text-blue-700 font-bold text-xs sm:text-sm">${rz} kN</td>
-        <td class="p-2.5 border text-center font-mono text-emerald-700 font-bold text-xs sm:text-sm">${my} kNm</td>
-        <td class="p-2.5 border text-center font-mono text-indigo-700 text-xs sm:text-[13px]">${mov} m</td>
+        <td class="p-2.5 border text-center font-mono font-bold text-slate-700 text-xs sm:text-sm whitespace-nowrap">${formatNum(s.x)} m</td>
+        <td class="p-2.5 border text-center font-mono text-blue-700 font-bold text-xs sm:text-sm whitespace-nowrap">${rz} kN</td>
+        <td class="p-2.5 border text-center font-mono text-emerald-700 font-bold text-xs sm:text-sm whitespace-nowrap">${my} kNm</td>
+        <td class="p-2.5 border text-center font-mono text-indigo-700 text-xs sm:text-[13px] whitespace-nowrap">${mov} m</td>
       </tr>
     `;
   });
@@ -292,12 +292,12 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
           <table class="w-full text-xs sm:text-sm border-collapse bg-white rounded-lg border border-slate-200 font-mono">
             <thead>
               <tr class="bg-slate-100 text-slate-800 font-sans text-xs sm:text-[13px]">
-                <th class="p-2.5 border text-center font-bold">${t.supportNodeCol || (isPl ? 'Węzeł' : 'Support')}</th>
-                <th class="p-2.5 border text-center font-bold">${isPl ? 'Typ podpory' : 'Support Type'}</th>
-                <th class="p-2.5 border text-center font-bold">${t.locCol || 'x [m]'}</th>
-                <th class="p-2.5 border text-center font-bold">${t.vertReactionCol || 'Rz [kN]'}</th>
-                <th class="p-2.5 border text-center font-bold">${t.momentReactionCol || 'MR [kNm]'}</th>
-                <th class="p-2.5 border text-center font-bold">${isPl ? 'Osiadanie Δ [m]' : 'Settlement Δ [m]'}</th>
+                <th class="p-2.5 border text-center font-bold whitespace-nowrap">${t.supportNodeCol || (isPl ? 'Węzeł' : 'Support')}</th>
+                <th class="p-2.5 border text-center font-bold whitespace-nowrap">${isPl ? 'Typ podpory' : 'Support Type'}</th>
+                <th class="p-2.5 border text-center font-bold whitespace-nowrap">${t.locCol || 'x [m]'}</th>
+                <th class="p-2.5 border text-center font-bold whitespace-nowrap">${t.vertReactionCol || 'Rz [kN]'}</th>
+                <th class="p-2.5 border text-center font-bold whitespace-nowrap">${t.momentReactionCol || 'MR [kNm]'}</th>
+                <th class="p-2.5 border text-center font-bold whitespace-nowrap">${isPl ? 'Osiadanie Δ [m]' : 'Settlement Δ [m]'}</th>
               </tr>
             </thead>
             <tbody>
@@ -368,46 +368,46 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
             <thead>
               <tr class="bg-slate-100 text-slate-800 font-sans text-xs sm:text-[13px]">
                 <th class="p-2.5 border text-left font-bold">${isPl ? 'Wielkość fizyczna' : 'Parameter'}</th>
-                <th class="p-2.5 border text-center font-bold">${isPl ? 'Symbol' : 'Symbol'}</th>
-                <th class="p-2.5 border text-center font-bold">${isPl ? 'Wartość ekstremalna' : 'Extreme Value'}</th>
-                <th class="p-2.5 border text-center font-bold">${isPl ? 'Położenie x' : 'Location x'}</th>
+                <th class="p-2.5 border text-center font-bold whitespace-nowrap">${isPl ? 'Symbol' : 'Symbol'}</th>
+                <th class="p-2.5 border text-center font-bold whitespace-nowrap">${isPl ? 'Wartość ekstremalna' : 'Extreme Value'}</th>
+                <th class="p-2.5 border text-center font-bold whitespace-nowrap">${isPl ? 'Położenie x' : 'Location x'}</th>
                 <th class="p-2.5 border text-left font-bold font-sans">${isPl ? 'Interpretacja inżynierska' : 'Engineering Note'}</th>
               </tr>
             </thead>
             <tbody>
               <tr class="hover:bg-slate-50 transition-colors">
                 <td class="p-2.5 border font-sans font-semibold text-slate-800 text-xs sm:text-[13px]">${isPl ? 'Maksymalna siła poprzeczna' : 'Maximum Positive Shear Force'}</td>
-                <td class="p-2.5 border text-center font-bold text-blue-700 text-sm sm:text-base">$T_{\\max}$</td>
-                <td class="p-2.5 border text-center font-bold text-blue-800 font-mono text-sm sm:text-base">${crit.maxV.val > 0 ? '+' : ''}${formatNum(crit.maxV.val)} kN</td>
-                <td class="p-2.5 border text-center font-bold text-slate-700 font-mono text-xs sm:text-sm">x = ${formatNum(crit.maxV.x)} m</td>
+                <td class="p-2.5 border text-center font-bold text-blue-700 text-sm sm:text-base whitespace-nowrap">$T_{\\max}$</td>
+                <td class="p-2.5 border text-center font-bold text-blue-800 font-mono text-sm sm:text-base whitespace-nowrap">${crit.maxV.val > 0 ? '+' : ''}${formatNum(crit.maxV.val)} kN</td>
+                <td class="p-2.5 border text-center font-bold text-slate-700 font-mono text-xs sm:text-sm whitespace-nowrap">x = ${formatNum(crit.maxV.x)} m</td>
                 <td class="p-2.5 border font-sans text-slate-600 text-xs sm:text-[13px]">${isPl ? 'Maksymalne ścinanie dodatnie' : 'Peak positive shear force'}</td>
               </tr>
               <tr class="hover:bg-slate-50 transition-colors">
                 <td class="p-2.5 border font-sans font-semibold text-slate-800 text-xs sm:text-[13px]">${isPl ? 'Minimalna siła poprzeczna' : 'Maximum Negative Shear Force'}</td>
-                <td class="p-2.5 border text-center font-bold text-red-700 text-sm sm:text-base">$T_{\\min}$</td>
-                <td class="p-2.5 border text-center font-bold text-red-800 font-mono text-sm sm:text-base">${formatNum(crit.minV.val)} kN</td>
-                <td class="p-2.5 border text-center font-bold text-slate-700 font-mono text-xs sm:text-sm">x = ${formatNum(crit.minV.x)} m</td>
+                <td class="p-2.5 border text-center font-bold text-red-700 text-sm sm:text-base whitespace-nowrap">$T_{\\min}$</td>
+                <td class="p-2.5 border text-center font-bold text-red-800 font-mono text-sm sm:text-base whitespace-nowrap">${formatNum(crit.minV.val)} kN</td>
+                <td class="p-2.5 border text-center font-bold text-slate-700 font-mono text-xs sm:text-sm whitespace-nowrap">x = ${formatNum(crit.minV.x)} m</td>
                 <td class="p-2.5 border font-sans text-slate-600 text-xs sm:text-[13px]">${isPl ? 'Maksymalne ścinanie ujemne' : 'Peak negative shear force'}</td>
               </tr>
               <tr class="hover:bg-slate-50 transition-colors">
                 <td class="p-2.5 border font-sans font-semibold text-slate-800 text-xs sm:text-[13px]">${isPl ? 'Maksymalny moment zginający' : 'Maximum Span Bending Moment'}</td>
-                <td class="p-2.5 border text-center font-bold text-emerald-700 text-sm sm:text-base">$M_{\\max}$</td>
-                <td class="p-2.5 border text-center font-bold text-emerald-800 font-mono text-sm sm:text-base">${crit.maxM.val > 0 ? '+' : ''}${formatNum(crit.maxM.val)} kNm</td>
-                <td class="p-2.5 border text-center font-bold text-slate-700 font-mono text-xs sm:text-sm">x = ${formatNum(crit.maxM.x)} m</td>
+                <td class="p-2.5 border text-center font-bold text-emerald-700 text-sm sm:text-base whitespace-nowrap">$M_{\\max}$</td>
+                <td class="p-2.5 border text-center font-bold text-emerald-800 font-mono text-sm sm:text-base whitespace-nowrap">${crit.maxM.val > 0 ? '+' : ''}${formatNum(crit.maxM.val)} kNm</td>
+                <td class="p-2.5 border text-center font-bold text-slate-700 font-mono text-xs sm:text-sm whitespace-nowrap">x = ${formatNum(crit.maxM.x)} m</td>
                 <td class="p-2.5 border font-sans text-slate-600 text-xs sm:text-[13px]">${isPl ? 'Rozciąganie włókien dolnych (przęsło)' : 'Bottom fibers in tension (sagging)'}</td>
               </tr>
               <tr class="hover:bg-slate-50 transition-colors">
                 <td class="p-2.5 border font-sans font-semibold text-slate-800 text-xs sm:text-[13px]">${isPl ? 'Minimalny moment zginający' : 'Maximum Support Bending Moment'}</td>
-                <td class="p-2.5 border text-center font-bold text-amber-700 text-sm sm:text-base">$M_{\\min}$</td>
-                <td class="p-2.5 border text-center font-bold text-amber-800 font-mono text-sm sm:text-base">${formatNum(crit.minM.val)} kNm</td>
-                <td class="p-2.5 border text-center font-bold text-slate-700 font-mono text-xs sm:text-sm">x = ${formatNum(crit.minM.x)} m</td>
+                <td class="p-2.5 border text-center font-bold text-amber-700 text-sm sm:text-base whitespace-nowrap">$M_{\\min}$</td>
+                <td class="p-2.5 border text-center font-bold text-amber-800 font-mono text-sm sm:text-base whitespace-nowrap">${formatNum(crit.minM.val)} kNm</td>
+                <td class="p-2.5 border text-center font-bold text-slate-700 font-mono text-xs sm:text-sm whitespace-nowrap">x = ${formatNum(crit.minM.x)} m</td>
                 <td class="p-2.5 border font-sans text-slate-600 text-xs sm:text-[13px]">${isPl ? 'Rozciąganie włókien górnych (podpora/wspornik)' : 'Top fibers in tension (hogging)'}</td>
               </tr>
               <tr class="hover:bg-slate-50 transition-colors">
                 <td class="p-2.5 border font-sans font-semibold text-slate-800 text-xs sm:text-[13px]">${isPl ? 'Maksymalne ugięcie sprężyste' : 'Maximum Elastic Deflection'}</td>
-                <td class="p-2.5 border text-center font-bold text-cyan-700 text-sm sm:text-base">$w_{\\max}$</td>
-                <td class="p-2.5 border text-center font-bold text-cyan-800 font-mono text-sm sm:text-base">${formatNum(maxW_mm)} mm</td>
-                <td class="p-2.5 border text-center font-bold text-slate-700 font-mono text-xs sm:text-sm">x = ${formatNum(crit.maxW.x)} m</td>
+                <td class="p-2.5 border text-center font-bold text-cyan-700 text-sm sm:text-base whitespace-nowrap">$w_{\\max}$</td>
+                <td class="p-2.5 border text-center font-bold text-cyan-800 font-mono text-sm sm:text-base whitespace-nowrap">${formatNum(maxW_mm)} mm</td>
+                <td class="p-2.5 border text-center font-bold text-slate-700 font-mono text-xs sm:text-sm whitespace-nowrap">x = ${formatNum(crit.maxW.x)} m</td>
                 <td class="p-2.5 border font-sans text-slate-600 text-xs sm:text-[13px]">${isPl ? 'Maksymalne przemieszczenie osi belki' : 'Peak transverse displacement'}</td>
               </tr>
             </tbody>
