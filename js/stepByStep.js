@@ -91,12 +91,12 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
 
     reactionsTableRows += `
       <tr class="hover:bg-slate-50 transition-colors">
-        <td class="p-2.5 border text-center font-bold text-slate-800 font-sans">${isPl ? 'Węzeł' : 'Node'} ${nodeLabel}</td>
-        <td class="p-2.5 border text-center font-sans text-slate-600 text-[11.5px]">${sType}</td>
-        <td class="p-2.5 border text-center font-mono font-bold text-slate-700">${formatNum(s.x)} m</td>
-        <td class="p-2.5 border text-center font-mono text-blue-700 font-bold text-[13px]">${rz} kN</td>
-        <td class="p-2.5 border text-center font-mono text-emerald-700 font-bold text-[13px]">${my} kNm</td>
-        <td class="p-2.5 border text-center font-mono text-indigo-700 text-[11.5px]">${mov} m</td>
+        <td class="p-2.5 border text-center font-bold text-slate-800 font-sans text-xs sm:text-sm">${isPl ? 'Węzeł' : 'Node'} ${nodeLabel}</td>
+        <td class="p-2.5 border text-center font-sans text-slate-600 text-xs sm:text-[13px]">${sType}</td>
+        <td class="p-2.5 border text-center font-mono font-bold text-slate-700 text-xs sm:text-sm">${formatNum(s.x)} m</td>
+        <td class="p-2.5 border text-center font-mono text-blue-700 font-bold text-xs sm:text-sm">${rz} kN</td>
+        <td class="p-2.5 border text-center font-mono text-emerald-700 font-bold text-xs sm:text-sm">${my} kNm</td>
+        <td class="p-2.5 border text-center font-mono text-indigo-700 text-xs sm:text-[13px]">${mov} m</td>
       </tr>
     `;
   });
@@ -133,7 +133,7 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
       );
       if (zerosInSeg.length > 0) {
         zeroShearNote = zerosInSeg.map(z => `
-          <div class="mt-2 p-2 bg-amber-50/90 border border-amber-200 rounded text-xs text-amber-950 font-mono">
+          <div class="mt-2.5 p-2.5 bg-amber-50/90 border border-amber-200 rounded-md text-xs sm:text-[13px] text-amber-950 font-mono">
             <span class="font-sans font-bold text-amber-900">${isPl ? 'Punkt zerowy siły tnącej (ekstremum momentu zginającego):' : 'Zero shear crossing (bending moment extremum):'}</span><br>
             $T(x_0) = 0 \\implies x_0 = ${formatNum(z.x)}\\text{ m} \\implies M_{\\text{ext}} = M(${formatNum(z.x)}) = ${formatNum(z.M)}\\text{ kNm}$
           </div>
@@ -142,25 +142,25 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
     }
 
     segmentBlocks += `
-      <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-xs">
-        <div class="font-bold text-xs text-slate-800 mb-2 border-b border-slate-100 pb-1.5 flex justify-between items-center font-sans">
-          <span class="text-blue-900 font-extrabold text-[12.5px]">
+      <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
+        <div class="font-bold text-slate-800 mb-2.5 border-b border-slate-100 pb-2 flex justify-between items-center font-sans">
+          <span class="text-blue-900 font-extrabold text-xs sm:text-sm">
             ${t.segmentLabel} ${idx + 1}: $x \\in [${formatNum(xStart)},\\, ${formatNum(xEnd)}]\\text{ m}$
           </span>
-          <span class="text-slate-500 font-mono text-[11.5px]">$\\Delta x = ${formatNum(dx)}\\text{ m}$</span>
+          <span class="text-slate-500 font-mono text-xs sm:text-[13px]">$\\Delta x = ${formatNum(dx)}\\text{ m}$</span>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono text-slate-800">
-          <div class="p-2.5 bg-blue-50/70 rounded border border-blue-100">
-            <div class="text-blue-900 font-bold text-[11.5px] font-sans mb-1">${t.shearEquationLabel}</div>
-            <div class="mb-1.5 text-[12.5px]">$${tLatex}\\text{ [kN]}$</div>
-            <div class="text-[11px] text-slate-600 border-t border-blue-100/80 pt-1">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs sm:text-sm font-mono text-slate-800">
+          <div class="p-3 bg-blue-50/70 rounded-md border border-blue-100">
+            <div class="text-blue-900 font-bold text-xs sm:text-[13px] font-sans uppercase tracking-wider mb-1">${t.shearEquationLabel}</div>
+            <div class="mb-2 text-sm sm:text-base font-semibold">$${tLatex}\\text{ [kN]}$</div>
+            <div class="text-xs sm:text-[12.5px] text-slate-600 border-t border-blue-100/80 pt-1.5 font-mono">
               $T(${formatNum(xStart)}) = ${formatNum(tStart)}\\text{ kN}, \\quad T(${formatNum(xEnd)}) = ${formatNum(tEnd)}\\text{ kN}$
             </div>
           </div>
-          <div class="p-2.5 bg-emerald-50/70 rounded border border-emerald-100">
-            <div class="text-emerald-900 font-bold text-[11.5px] font-sans mb-1">${t.momentEquationLabel}</div>
-            <div class="mb-1.5 text-[12.5px]">$${mLatex}\\text{ [kNm]}$</div>
-            <div class="text-[11px] text-slate-600 border-t border-emerald-100/80 pt-1">
+          <div class="p-3 bg-emerald-50/70 rounded-md border border-emerald-100">
+            <div class="text-emerald-900 font-bold text-xs sm:text-[13px] font-sans uppercase tracking-wider mb-1">${t.momentEquationLabel}</div>
+            <div class="mb-2 text-sm sm:text-base font-semibold">$${mLatex}\\text{ [kNm]}$</div>
+            <div class="text-xs sm:text-[12.5px] text-slate-600 border-t border-emerald-100/80 pt-1.5 font-mono">
               $M(${formatNum(xStart)}) = ${formatNum(mStart)}\\text{ kNm}, \\quad M(${formatNum(xEnd)}) = ${formatNum(mEnd)}\\text{ kNm}$
             </div>
           </div>
@@ -181,14 +181,14 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
       <div class="pb-3 border-b-2 border-slate-900">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div>
-            <h2 class="text-base sm:text-lg font-black text-slate-900 tracking-tight uppercase">
+            <h2 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase">
               ${isPl ? 'Sprawozdanie z Obliczeń Statycznych Belki 2D' : '2D Beam Static Analysis & Calculation Report'}
             </h2>
-            <div class="text-[11.5px] text-slate-500 mt-0.5">
+            <div class="text-xs sm:text-[13px] text-slate-500 mt-1 font-medium">
               ${isPl ? 'Analityczna teoria Eulera-Bernoulliego • Wytrzymałość Materiałów i Mechanika Budowli' : 'Analytical Euler-Bernoulli Theory • Mechanics of Materials & Structural Analysis'}
             </div>
           </div>
-          <div class="text-right text-[11px] font-mono text-slate-700 bg-slate-100 px-2.5 py-1.5 rounded border border-slate-200">
+          <div class="text-right text-xs font-mono text-slate-700 bg-slate-100 px-3 py-1.5 rounded-md border border-slate-200">
             <div><strong>EJ = const</strong></div>
             <div>${new Date().toLocaleDateString()}</div>
           </div>
@@ -197,9 +197,9 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
 
       <!-- SECTION 1: Structural Scheme & Static Determinacy -->
       <div class="bg-white border border-slate-200 rounded-lg p-4 sm:p-5 shadow-xs">
-        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3 pb-2 border-b border-slate-200 flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900 uppercase tracking-wide mb-3 pb-2.5 border-b border-slate-200 flex items-center justify-between">
           <span>${t.section1Title || (isPl ? '1. Układ konstrukcyjny i stopień wyznaczalności' : '1. Structural Scheme & Static Determinacy')}</span>
-          <span class="text-xs font-normal text-slate-400 normal-case font-mono">${isPl ? 'Geometria i podpory' : 'Geometry & Supports'}</span>
+          <span class="text-xs font-normal text-slate-500 normal-case font-mono">${isPl ? 'Geometria i podpory' : 'Geometry & Supports'}</span>
         </h3>
 
         <!-- Figure 1: Unsolved Structure -->
@@ -208,35 +208,35 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
             <div class="flex justify-center items-center p-2 bg-white rounded border border-slate-100 overflow-hidden">
               <img src="${unsolvedImg}" alt="Structural Scheme" class="max-h-56 sm:max-h-64 w-auto object-contain" />
             </div>
-            <div class="text-[12px] font-medium text-slate-600 mt-2 font-sans">
+            <div class="text-xs sm:text-[13px] font-semibold text-slate-600 mt-2 font-sans">
               ${isPl ? 'Rys. 1: Schemat statyczny belki — geometria, warunki brzegowe i obciążenia zewnętrzne' : 'Fig. 1: Structural scheme of the beam — geometry, boundary conditions and applied loads'}
             </div>
           </div>
         ` : ''}
 
         <!-- Parameters: EJ and Static Determinacy Formula (Length omitted as it is clearly dimensioned in Figure 1) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
-          <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
-            <div class="text-slate-500 text-[10.5px] uppercase font-sans font-semibold mb-1">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-lg">
+            <div class="text-slate-500 text-xs uppercase font-sans font-bold tracking-wider mb-1.5">
               ${isPl ? 'Sztywność zginania belki (EJ)' : 'Bending Rigidity (EJ)'}
             </div>
-            <div class="text-base font-bold text-slate-900 font-mono">
+            <div class="text-lg font-bold text-slate-900 font-mono">
               $EJ = ${EJ.toLocaleString()}\\text{ kN}\\cdot\\text{m}^2$
             </div>
-            <div class="text-[11px] text-slate-500 font-sans mt-0.5">
+            <div class="text-xs text-slate-600 font-sans mt-1">
               ${isPl ? 'Założenie: EJ = const na całej długości belki' : 'Assumption: EJ = const along the entire beam length'}
             </div>
           </div>
 
-          <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
-            <div class="text-slate-500 text-[10.5px] uppercase font-sans font-semibold mb-1">
+          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-lg">
+            <div class="text-slate-500 text-xs uppercase font-sans font-bold tracking-wider mb-1.5">
               ${isPl ? 'Stopień statycznej wyznaczalności (n)' : 'Degree of Static Determinacy (n)'}
             </div>
-            <div class="text-[13px] font-bold text-slate-900 font-mono">
+            <div class="text-sm sm:text-base font-bold text-slate-900 font-mono">
               $$n = r - (2 + h) = ${supportDof} - (2 + ${hingeCount}) = ${nDegree}$$
             </div>
-            <div class="mt-1">
-              <span class="inline-block px-2.5 py-0.5 rounded text-[11.5px] font-bold font-sans ${nDegree === 0 ? 'bg-emerald-100 text-emerald-800' : (nDegree > 0 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800')}">
+            <div class="mt-1.5">
+              <span class="inline-block px-3 py-1 rounded-md text-xs sm:text-[13px] font-bold font-sans ${nDegree === 0 ? 'bg-emerald-100 text-emerald-800' : (nDegree > 0 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800')}">
                 ${classificationText}
               </span>
             </div>
@@ -246,9 +246,9 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
 
       <!-- SECTION 2: Global Equilibrium & Reactions -->
       <div class="bg-white border border-slate-200 rounded-lg p-4 sm:p-5 shadow-xs">
-        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3 pb-2 border-b border-slate-200 flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900 uppercase tracking-wide mb-3 pb-2.5 border-b border-slate-200 flex items-center justify-between">
           <span>${t.section2Title || (isPl ? '2. Równania równowagi i reakcje podpór' : '2. Global Equilibrium & Reactions')}</span>
-          <span class="text-xs font-normal text-slate-400 normal-case font-mono">${isPl ? 'Warunki statyki' : 'Static conditions'}</span>
+          <span class="text-xs font-normal text-slate-500 normal-case font-mono">${isPl ? 'Warunki statyki' : 'Static conditions'}</span>
         </h3>
 
         <!-- Figure 2: Reactions Free-Body Diagram -->
@@ -257,30 +257,30 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
             <div class="flex justify-center items-center p-2 bg-white rounded border border-slate-100 overflow-hidden">
               <img src="${reactionsImg}" alt="Support Reactions Scheme" class="max-h-56 sm:max-h-64 w-auto object-contain" />
             </div>
-            <div class="text-[12px] font-medium text-slate-600 mt-2 font-sans">
-              ${isPl ? 'Rys. 2: Schemat ze wyznaczonymi reakcjami podporowymi i momentami utwierdzenia' : 'Fig. 2: Free-body diagram with calculated support reaction forces and fixed-end moments'}
+            <div class="text-xs sm:text-[13px] font-semibold text-slate-600 mt-2 font-sans">
+              ${isPl ? 'Rys. 2: Schemat z wyznaczonymi reakcjami podporowymi i momentami utwierdzenia' : 'Fig. 2: Free-body diagram with calculated support reaction forces and fixed-end moments'}
             </div>
           </div>
         ` : ''}
 
         <!-- Formal Equilibrium Equations -->
-        <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-lg mb-4 text-xs font-mono text-slate-800 space-y-2">
-          <div class="font-sans font-bold text-slate-700 text-[11px] uppercase tracking-wide border-b border-slate-200 pb-1 mb-2">
+        <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-lg mb-4 text-slate-800 space-y-2.5">
+          <div class="font-sans font-bold text-slate-700 text-xs uppercase tracking-wider border-b border-slate-200 pb-1.5 mb-2">
             ${isPl ? 'Formalny zapis warunków równowagi statycznej w płaszczyźnie (x, z):' : 'Formal Planar Equilibrium Equations in (x, z) Plane:'}
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div class="bg-white p-3 rounded border border-slate-200">
-              <div class="font-bold text-slate-700 mb-1 font-sans text-[11.5px]">${t.vertEq || (isPl ? 'Rzut sił na oś Z:' : 'Vertical Force Equilibrium:')}</div>
-              <div class="text-[12.5px]">$$\\sum F_z = 0 \\implies \\sum F_{z,\\text{ext}} - \\sum R_z = 0$$</div>
-              <div class="text-[11px] text-slate-600 mt-0.5">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div class="bg-white p-3.5 rounded-md border border-slate-200">
+              <div class="font-bold text-slate-800 mb-1 font-sans text-xs sm:text-sm">${t.vertEq || (isPl ? 'Rzut sił na oś Z:' : 'Vertical Force Equilibrium:')}</div>
+              <div class="text-sm sm:text-base font-semibold">$$\\sum F_z = 0 \\implies \\sum F_{z,\\text{ext}} - \\sum R_z = 0$$</div>
+              <div class="text-xs sm:text-[13px] text-slate-600 mt-1 font-mono">
                 $${formatNum(eq.sumFzLoads)}\\text{ kN} - ${formatNum(eq.sumFzReactions)}\\text{ kN} = ${formatNum(eq.sumFzLoads - eq.sumFzReactions, 3)}\\text{ kN} \\quad \\text{[OK ✓]}$
               </div>
             </div>
 
-            <div class="bg-white p-3 rounded border border-slate-200">
-              <div class="font-bold text-slate-700 mb-1 font-sans text-[11.5px]">${t.momentEq || (isPl ? 'Moment względem x = 0:' : 'Moment Equilibrium at Origin:')}</div>
-              <div class="text-[12.5px]">$$\\sum M_{(0)} = 0 \\implies \\sum M_{\\text{ext}} - \\sum M_{\\text{react}} = 0$$</div>
-              <div class="text-[11px] text-slate-600 mt-0.5">
+            <div class="bg-white p-3.5 rounded-md border border-slate-200">
+              <div class="font-bold text-slate-800 mb-1 font-sans text-xs sm:text-sm">${t.momentEq || (isPl ? 'Moment względem x = 0:' : 'Moment Equilibrium at Origin:')}</div>
+              <div class="text-sm sm:text-base font-semibold">$$\\sum M_{(0)} = 0 \\implies \\sum M_{\\text{ext}} - \\sum M_{\\text{react}} = 0$$</div>
+              <div class="text-xs sm:text-[13px] text-slate-600 mt-1 font-mono">
                 $${formatNum(eq.sumMyLoads)}\\text{ kNm} - ${formatNum(eq.sumMyReactions)}\\text{ kNm} = ${formatNum(eq.sumMyLoads - eq.sumMyReactions, 3)}\\text{ kNm} \\quad \\text{[OK ✓]}$
               </div>
             </div>
@@ -289,15 +289,15 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
 
         <!-- Reactions Summary Table -->
         <div class="overflow-x-auto">
-          <table class="w-full text-xs border-collapse bg-white rounded border border-slate-200 font-mono">
+          <table class="w-full text-xs sm:text-sm border-collapse bg-white rounded-lg border border-slate-200 font-mono">
             <thead>
-              <tr class="bg-slate-100 text-slate-700 font-sans">
-                <th class="p-2 border text-center font-bold">${t.supportNodeCol || (isPl ? 'Węzeł' : 'Support')}</th>
-                <th class="p-2 border text-center font-bold">${isPl ? 'Typ podpory' : 'Support Type'}</th>
-                <th class="p-2 border text-center font-bold">${t.locCol || 'x [m]'}</th>
-                <th class="p-2 border text-center font-bold">${t.vertReactionCol || 'Rz [kN]'}</th>
-                <th class="p-2 border text-center font-bold">${t.momentReactionCol || 'MR [kNm]'}</th>
-                <th class="p-2 border text-center font-bold">${isPl ? 'Osiadanie Δ [m]' : 'Settlement Δ [m]'}</th>
+              <tr class="bg-slate-100 text-slate-800 font-sans text-xs sm:text-[13px]">
+                <th class="p-2.5 border text-center font-bold">${t.supportNodeCol || (isPl ? 'Węzeł' : 'Support')}</th>
+                <th class="p-2.5 border text-center font-bold">${isPl ? 'Typ podpory' : 'Support Type'}</th>
+                <th class="p-2.5 border text-center font-bold">${t.locCol || 'x [m]'}</th>
+                <th class="p-2.5 border text-center font-bold">${t.vertReactionCol || 'Rz [kN]'}</th>
+                <th class="p-2.5 border text-center font-bold">${t.momentReactionCol || 'MR [kNm]'}</th>
+                <th class="p-2.5 border text-center font-bold">${isPl ? 'Osiadanie Δ [m]' : 'Settlement Δ [m]'}</th>
               </tr>
             </thead>
             <tbody>
@@ -309,9 +309,9 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
 
       <!-- SECTION 3: Internal Force Diagrams & Derivations -->
       <div class="bg-white border border-slate-200 rounded-lg p-4 sm:p-5 shadow-xs">
-        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3 pb-2 border-b border-slate-200 flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900 uppercase tracking-wide mb-3 pb-2.5 border-b border-slate-200 flex items-center justify-between">
           <span>${t.section3Title || (isPl ? '3. Wykresy i równania analityczne sił wewnętrznych' : '3. Internal Force Diagrams & Segment Equations')}</span>
-          <span class="text-xs font-normal text-slate-400 normal-case font-mono">T(x), M(x)</span>
+          <span class="text-xs font-normal text-slate-500 normal-case font-mono">T(x), M(x)</span>
         </h3>
 
         <!-- Figures 3 & 4: T(x) and M(x) Diagrams Shown First -->
@@ -322,7 +322,7 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
                 <div class="flex justify-center items-center p-2 bg-white rounded border border-slate-100 overflow-hidden">
                   <img src="${shearImg}" alt="Shear Force Diagram" class="max-h-52 w-auto object-contain" />
                 </div>
-                <div class="text-[12px] font-medium text-slate-600 mt-2 font-sans">
+                <div class="text-xs sm:text-[13px] font-semibold text-slate-600 mt-2 font-sans">
                   ${isPl ? 'Rys. 3: T(x) [kN]' : 'Fig. 3: T(x) [kN]'}
                 </div>
               </div>
@@ -333,7 +333,7 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
                 <div class="flex justify-center items-center p-2 bg-white rounded border border-slate-100 overflow-hidden">
                   <img src="${momentImg}" alt="Bending Moment Diagram" class="max-h-52 w-auto object-contain" />
                 </div>
-                <div class="text-[12px] font-medium text-slate-600 mt-2 font-sans">
+                <div class="text-xs sm:text-[13px] font-semibold text-slate-600 mt-2 font-sans">
                   ${isPl ? 'Rys. 4: M(x) [kNm] (włókna rozciągane)' : 'Fig. 4: M(x) [kNm] (tension fiber side)'}
                 </div>
               </div>
@@ -342,9 +342,11 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
         ` : ''}
 
         <!-- Governing Differential Relations -->
-        <div class="p-3 bg-blue-50/80 border border-blue-200 rounded-lg mb-4 text-xs font-mono text-blue-950">
-          <span class="font-sans font-bold uppercase tracking-wide text-blue-900">${isPl ? 'Związki różniczkowe Eulera-Bernoulliego:' : 'Euler-Bernoulli Governing Differential Relations:'}</span><br>
-          $$\\frac{dT(x)}{dx} = -q(x), \\qquad \\frac{dM(x)}{dx} = T(x)$$
+        <div class="p-3.5 bg-blue-50/80 border border-blue-200 rounded-lg mb-4 text-blue-950">
+          <div class="font-sans font-bold uppercase tracking-wider text-blue-900 text-xs sm:text-[12.5px] mb-1.5">${isPl ? 'Związki różniczkowe Eulera-Bernoulliego:' : 'Euler-Bernoulli Governing Differential Relations:'}</div>
+          <div class="text-sm sm:text-base font-mono">
+            $$\\frac{dT(x)}{dx} = -q(x), \\qquad \\frac{dM(x)}{dx} = T(x)$$
+          </div>
         </div>
 
         <!-- Segment Derivations -->
@@ -355,58 +357,58 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
 
       <!-- SECTION 4: Extremum Values Summary -->
       <div class="bg-white border border-slate-200 rounded-lg p-4 sm:p-5 shadow-xs">
-        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3 pb-2 border-b border-slate-200 flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900 uppercase tracking-wide mb-3 pb-2.5 border-b border-slate-200 flex items-center justify-between">
           <span>${t.section4Title || (isPl ? '4. Zestawienie wartości ekstremalnych' : '4. Extremum Values Summary')}</span>
-          <span class="text-xs font-normal text-slate-400 normal-case font-mono">${isPl ? 'Wartości charakterystyczne' : 'Characteristic values'}</span>
+          <span class="text-xs font-normal text-slate-500 normal-case font-mono">${isPl ? 'Wartości charakterystyczne' : 'Characteristic values'}</span>
         </h3>
 
         <!-- Formal Extrema Table -->
         <div class="overflow-x-auto">
-          <table class="w-full text-xs border-collapse bg-white rounded border border-slate-200 font-mono">
+          <table class="w-full text-xs sm:text-sm border-collapse bg-white rounded-lg border border-slate-200 font-mono">
             <thead>
-              <tr class="bg-slate-100 text-slate-700 font-sans">
-                <th class="p-2 border text-left font-bold">${isPl ? 'Wielkość fizyczna' : 'Parameter'}</th>
-                <th class="p-2 border text-center font-bold">${isPl ? 'Symbol' : 'Symbol'}</th>
-                <th class="p-2 border text-center font-bold">${isPl ? 'Wartość ekstremalna' : 'Extreme Value'}</th>
-                <th class="p-2 border text-center font-bold">${isPl ? 'Położenie x' : 'Location x'}</th>
-                <th class="p-2 border text-left font-bold font-sans">${isPl ? 'Interpretacja inżynierska' : 'Engineering Note'}</th>
+              <tr class="bg-slate-100 text-slate-800 font-sans text-xs sm:text-[13px]">
+                <th class="p-2.5 border text-left font-bold">${isPl ? 'Wielkość fizyczna' : 'Parameter'}</th>
+                <th class="p-2.5 border text-center font-bold">${isPl ? 'Symbol' : 'Symbol'}</th>
+                <th class="p-2.5 border text-center font-bold">${isPl ? 'Wartość ekstremalna' : 'Extreme Value'}</th>
+                <th class="p-2.5 border text-center font-bold">${isPl ? 'Położenie x' : 'Location x'}</th>
+                <th class="p-2.5 border text-left font-bold font-sans">${isPl ? 'Interpretacja inżynierska' : 'Engineering Note'}</th>
               </tr>
             </thead>
             <tbody>
               <tr class="hover:bg-slate-50 transition-colors">
-                <td class="p-2 border font-sans font-semibold text-slate-800">${isPl ? 'Maksymalna siła poprzeczna' : 'Maximum Positive Shear Force'}</td>
-                <td class="p-2 border text-center font-bold text-blue-700">$T_{\\max}$</td>
-                <td class="p-2 border text-center font-bold text-blue-800 text-[13px]">${crit.maxV.val > 0 ? '+' : ''}${formatNum(crit.maxV.val)} kN</td>
-                <td class="p-2 border text-center font-bold text-slate-700">x = ${formatNum(crit.maxV.x)} m</td>
-                <td class="p-2 border font-sans text-slate-600 text-[11.5px]">${isPl ? 'Maksymalne ścinanie dodatnie' : 'Peak positive shear force'}</td>
+                <td class="p-2.5 border font-sans font-semibold text-slate-800 text-xs sm:text-[13px]">${isPl ? 'Maksymalna siła poprzeczna' : 'Maximum Positive Shear Force'}</td>
+                <td class="p-2.5 border text-center font-bold text-blue-700 text-sm sm:text-base">$T_{\\max}$</td>
+                <td class="p-2.5 border text-center font-bold text-blue-800 font-mono text-sm sm:text-base">${crit.maxV.val > 0 ? '+' : ''}${formatNum(crit.maxV.val)} kN</td>
+                <td class="p-2.5 border text-center font-bold text-slate-700 font-mono text-xs sm:text-sm">x = ${formatNum(crit.maxV.x)} m</td>
+                <td class="p-2.5 border font-sans text-slate-600 text-xs sm:text-[13px]">${isPl ? 'Maksymalne ścinanie dodatnie' : 'Peak positive shear force'}</td>
               </tr>
               <tr class="hover:bg-slate-50 transition-colors">
-                <td class="p-2 border font-sans font-semibold text-slate-800">${isPl ? 'Minimalna siła poprzeczna' : 'Maximum Negative Shear Force'}</td>
-                <td class="p-2 border text-center font-bold text-red-700">$T_{\\min}$</td>
-                <td class="p-2 border text-center font-bold text-red-800 text-[13px]">${formatNum(crit.minV.val)} kN</td>
-                <td class="p-2 border text-center font-bold text-slate-700">x = ${formatNum(crit.minV.x)} m</td>
-                <td class="p-2 border font-sans text-slate-600 text-[11.5px]">${isPl ? 'Maksymalne ścinanie ujemne' : 'Peak negative shear force'}</td>
+                <td class="p-2.5 border font-sans font-semibold text-slate-800 text-xs sm:text-[13px]">${isPl ? 'Minimalna siła poprzeczna' : 'Maximum Negative Shear Force'}</td>
+                <td class="p-2.5 border text-center font-bold text-red-700 text-sm sm:text-base">$T_{\\min}$</td>
+                <td class="p-2.5 border text-center font-bold text-red-800 font-mono text-sm sm:text-base">${formatNum(crit.minV.val)} kN</td>
+                <td class="p-2.5 border text-center font-bold text-slate-700 font-mono text-xs sm:text-sm">x = ${formatNum(crit.minV.x)} m</td>
+                <td class="p-2.5 border font-sans text-slate-600 text-xs sm:text-[13px]">${isPl ? 'Maksymalne ścinanie ujemne' : 'Peak negative shear force'}</td>
               </tr>
               <tr class="hover:bg-slate-50 transition-colors">
-                <td class="p-2 border font-sans font-semibold text-slate-800">${isPl ? 'Maksymalny moment zginający' : 'Maximum Span Bending Moment'}</td>
-                <td class="p-2 border text-center font-bold text-emerald-700">$M_{\\max}$</td>
-                <td class="p-2 border text-center font-bold text-emerald-800 text-[13px]">${crit.maxM.val > 0 ? '+' : ''}${formatNum(crit.maxM.val)} kNm</td>
-                <td class="p-2 border text-center font-bold text-slate-700">x = ${formatNum(crit.maxM.x)} m</td>
-                <td class="p-2 border font-sans text-slate-600 text-[11.5px]">${isPl ? 'Rozciąganie włókien dolnych (przęsło)' : 'Bottom fibers in tension (sagging)'}</td>
+                <td class="p-2.5 border font-sans font-semibold text-slate-800 text-xs sm:text-[13px]">${isPl ? 'Maksymalny moment zginający' : 'Maximum Span Bending Moment'}</td>
+                <td class="p-2.5 border text-center font-bold text-emerald-700 text-sm sm:text-base">$M_{\\max}$</td>
+                <td class="p-2.5 border text-center font-bold text-emerald-800 font-mono text-sm sm:text-base">${crit.maxM.val > 0 ? '+' : ''}${formatNum(crit.maxM.val)} kNm</td>
+                <td class="p-2.5 border text-center font-bold text-slate-700 font-mono text-xs sm:text-sm">x = ${formatNum(crit.maxM.x)} m</td>
+                <td class="p-2.5 border font-sans text-slate-600 text-xs sm:text-[13px]">${isPl ? 'Rozciąganie włókien dolnych (przęsło)' : 'Bottom fibers in tension (sagging)'}</td>
               </tr>
               <tr class="hover:bg-slate-50 transition-colors">
-                <td class="p-2 border font-sans font-semibold text-slate-800">${isPl ? 'Minimalny moment zginający' : 'Maximum Support Bending Moment'}</td>
-                <td class="p-2 border text-center font-bold text-amber-700">$M_{\\min}$</td>
-                <td class="p-2 border text-center font-bold text-amber-800 text-[13px]">${formatNum(crit.minM.val)} kNm</td>
-                <td class="p-2 border text-center font-bold text-slate-700">x = ${formatNum(crit.minM.x)} m</td>
-                <td class="p-2 border font-sans text-slate-600 text-[11.5px]">${isPl ? 'Rozciąganie włókien górnych (podpora/wspornik)' : 'Top fibers in tension (hogging)'}</td>
+                <td class="p-2.5 border font-sans font-semibold text-slate-800 text-xs sm:text-[13px]">${isPl ? 'Minimalny moment zginający' : 'Maximum Support Bending Moment'}</td>
+                <td class="p-2.5 border text-center font-bold text-amber-700 text-sm sm:text-base">$M_{\\min}$</td>
+                <td class="p-2.5 border text-center font-bold text-amber-800 font-mono text-sm sm:text-base">${formatNum(crit.minM.val)} kNm</td>
+                <td class="p-2.5 border text-center font-bold text-slate-700 font-mono text-xs sm:text-sm">x = ${formatNum(crit.minM.x)} m</td>
+                <td class="p-2.5 border font-sans text-slate-600 text-xs sm:text-[13px]">${isPl ? 'Rozciąganie włókien górnych (podpora/wspornik)' : 'Top fibers in tension (hogging)'}</td>
               </tr>
               <tr class="hover:bg-slate-50 transition-colors">
-                <td class="p-2 border font-sans font-semibold text-slate-800">${isPl ? 'Maksymalne ugięcie sprężyste' : 'Maximum Elastic Deflection'}</td>
-                <td class="p-2 border text-center font-bold text-cyan-700">$w_{\\max}$</td>
-                <td class="p-2 border text-center font-bold text-cyan-800 text-[13px]">${formatNum(maxW_mm)} mm</td>
-                <td class="p-2 border text-center font-bold text-slate-700">x = ${formatNum(crit.maxW.x)} m</td>
-                <td class="p-2 border font-sans text-slate-600 font-mono text-[11.5px]">${isPl ? 'Maksymalne przemieszczenie osi belki' : 'Peak transverse displacement'}</td>
+                <td class="p-2.5 border font-sans font-semibold text-slate-800 text-xs sm:text-[13px]">${isPl ? 'Maksymalne ugięcie sprężyste' : 'Maximum Elastic Deflection'}</td>
+                <td class="p-2.5 border text-center font-bold text-cyan-700 text-sm sm:text-base">$w_{\\max}$</td>
+                <td class="p-2.5 border text-center font-bold text-cyan-800 font-mono text-sm sm:text-base">${formatNum(maxW_mm)} mm</td>
+                <td class="p-2.5 border text-center font-bold text-slate-700 font-mono text-xs sm:text-sm">x = ${formatNum(crit.maxW.x)} m</td>
+                <td class="p-2.5 border font-sans text-slate-600 text-xs sm:text-[13px]">${isPl ? 'Maksymalne przemieszczenie osi belki' : 'Peak transverse displacement'}</td>
               </tr>
             </tbody>
           </table>
