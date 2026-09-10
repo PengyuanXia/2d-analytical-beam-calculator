@@ -170,11 +170,9 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
     `;
   });
 
-  // Calculate Deflection Limit State
+  // Calculate Maximum Deflection
   const maxAbsW = Math.max(1e-9, Math.max(Math.abs(crit.maxW.val), Math.abs(crit.minW.val)));
   const maxW_mm = maxAbsW * 1000;
-  const allowableW_mm = (L / 250) * 1000;
-  const ratio = Math.abs(L / maxAbsW);
 
   return `
     <div class="report-container space-y-6 text-slate-800 font-sans">
@@ -355,15 +353,15 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
         </div>
       </div>
 
-      <!-- SECTION 4: Extremum Values Summary & SLS Verification -->
+      <!-- SECTION 4: Extremum Values Summary -->
       <div class="bg-white border border-slate-200 rounded-lg p-4 sm:p-5 shadow-xs">
         <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3 pb-2 border-b border-slate-200 flex items-center justify-between">
           <span>${t.section4Title || (isPl ? '4. Zestawienie wartości ekstremalnych' : '4. Extremum Values Summary')}</span>
-          <span class="text-xs font-normal text-slate-400 normal-case font-mono">${isPl ? 'SGN i SGU' : 'ULS & SLS Summary'}</span>
+          <span class="text-xs font-normal text-slate-400 normal-case font-mono">${isPl ? 'Wartości charakterystyczne' : 'Characteristic values'}</span>
         </h3>
 
         <!-- Formal Extrema Table -->
-        <div class="overflow-x-auto mb-4">
+        <div class="overflow-x-auto">
           <table class="w-full text-xs border-collapse bg-white rounded border border-slate-200 font-mono">
             <thead>
               <tr class="bg-slate-100 text-slate-700 font-sans">
@@ -408,25 +406,10 @@ export function generateStepByStepReport(beamData, solution, lang = 'en', images
                 <td class="p-2 border text-center font-bold text-cyan-700">$w_{\\max}$</td>
                 <td class="p-2 border text-center font-bold text-cyan-800 text-[13px]">${formatNum(maxW_mm)} mm</td>
                 <td class="p-2 border text-center font-bold text-slate-700">x = ${formatNum(crit.maxW.x)} m</td>
-                <td class="p-2 border font-sans text-slate-600 font-mono text-[11.5px]">$\\approx L / ${formatNum(ratio, 0)}$</td>
+                <td class="p-2 border font-sans text-slate-600 font-mono text-[11.5px]">${isPl ? 'Maksymalne przemieszczenie osi belki' : 'Peak transverse displacement'}</td>
               </tr>
             </tbody>
           </table>
-        </div>
-
-        <!-- SLS / SGU Deflection Verification Box -->
-        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800">
-          <div class="font-sans font-bold text-slate-700 mb-1 text-[11.5px]">
-            ${isPl ? 'Weryfikacja Stanu Granicznego Użytkowalności (SGU — ugięcie sprężyste):' : 'Serviceability Limit State Verification (SLS — Elastic Deflection):'}
-          </div>
-          <div class="text-[12.5px] mt-1">
-            $$w_{\\max} = ${formatNum(maxW_mm)}\\text{ mm} \\quad \\left( \\frac{L}{${formatNum(ratio, 0)}} \\right) \\qquad \\text{wobec dopuszczalnego } w_{\\text{dop}} = \\frac{L}{250} = ${formatNum(allowableW_mm)}\\text{ mm}$$
-          </div>
-          <div class="text-[11.5px] font-sans font-semibold mt-1.5 ${maxW_mm <= allowableW_mm ? 'text-emerald-700' : 'text-amber-700'}">
-            ${maxW_mm <= allowableW_mm 
-              ? (isPl ? '✓ Warunek sztywności spełniony: ugięcie nie przekracza wartości dopuszczalnej (w_max ≤ L/250)' : '✓ Deflection criterion satisfied: max deflection does not exceed allowable limit (w_max ≤ L/250)') 
-              : (isPl ? '⚠ Ugięcie przekracza kryterium normowe L/250' : '⚠ Max deflection exceeds normative criterion L/250')}
-          </div>
         </div>
       </div>
 

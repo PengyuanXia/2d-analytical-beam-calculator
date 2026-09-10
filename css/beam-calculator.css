@@ -1407,11 +1407,17 @@ input[type=number] {
 
 /* Print CSS */
 @media print {
+  @page {
+    margin: 12mm 15mm 15mm 15mm;
+    size: auto;
+  }
   body, html {
     overflow: visible !important;
     height: auto !important;
     background: #ffffff !important;
-    font-size: 12pt !important;
+    font-size: 11pt !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   .app-container,
   #structlab-universal-bar,
@@ -1427,7 +1433,8 @@ input[type=number] {
   #modalAddElement,
   #modalContact,
   #modalShare,
-  .toast-notification {
+  .toast-notification,
+  .modal-overlay#modalCalcDetails .modal-header {
     display: none !important;
   }
   .modal-overlay#modalCalcDetails {
@@ -1437,6 +1444,7 @@ input[type=number] {
     pointer-events: auto !important;
     background: transparent !important;
     padding: 0 !important;
+    margin: 0 !important;
   }
   .modal-overlay#modalCalcDetails .modal-content {
     width: 100% !important;
@@ -1446,21 +1454,42 @@ input[type=number] {
     border: none !important;
     overflow: visible !important;
     transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
   }
   .modal-overlay#modalCalcDetails .modal-body {
+    display: block !important;
     overflow: visible !important;
     max-height: none !important;
     padding: 0 !important;
+    margin: 0 !important;
+  }
+  .modal-overlay#modalCalcDetails .space-y-6 {
+    display: block !important;
+  }
+  .modal-overlay#modalCalcDetails .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 14px !important;
+  }
+  .modal-overlay#modalCalcDetails,
+  .modal-overlay#modalCalcDetails .modal-content,
+  .modal-overlay#modalCalcDetails .modal-body,
+  .modal-overlay#modalCalcDetails .report-container,
+  .modal-overlay#modalCalcDetails div {
+    break-inside: auto;
+    page-break-inside: auto;
   }
   .modal-overlay#modalCalcDetails img {
     max-width: 100% !important;
     height: auto !important;
-    max-height: 240px !important;
+    max-height: 170px !important;
     object-fit: contain !important;
     break-inside: avoid !important;
     page-break-inside: avoid !important;
   }
-  .poly-card, div {
-    break-inside: avoid;
+  .modal-overlay#modalCalcDetails table,
+  .modal-overlay#modalCalcDetails tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 }
