@@ -604,6 +604,8 @@ export class BeamCalculatorApp {
     if (lblContactModalTitle && t.contactModalTitle) lblContactModalTitle.textContent = t.contactModalTitle;
     const lblContactAuthorSub = document.getElementById('lblContactAuthorSub');
     if (lblContactAuthorSub && t.contactAuthorSub) lblContactAuthorSub.textContent = t.contactAuthorSub;
+    const lblContactMissionNote = document.getElementById('lblContactMissionNote');
+    if (lblContactMissionNote && t.contactMissionNote) lblContactMissionNote.textContent = t.contactMissionNote;
     const lblContactEmailTitle = document.getElementById('lblContactEmailTitle');
     if (lblContactEmailTitle && t.contactEmailTitle) lblContactEmailTitle.textContent = t.contactEmailTitle;
     const lblContactGithubTitle = document.getElementById('lblContactGithubTitle');
