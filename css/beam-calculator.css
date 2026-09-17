@@ -335,11 +335,11 @@ html, body {
   color: #64748b;
 }
 
-.header-mission-pill {
+.structlab-mission-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 12px;
+  padding: 2px 11px;
   background: rgba(245, 158, 11, 0.12);
   border: 1px solid rgba(245, 158, 11, 0.35);
   border-radius: 9999px;
@@ -348,19 +348,14 @@ html, body {
   color: #92400e;
   text-decoration: none;
   transition: all 0.2s ease;
+  line-height: 1.4;
   white-space: nowrap;
 }
 
-.header-mission-pill:hover {
+.structlab-mission-pill:hover {
   background: rgba(245, 158, 11, 0.22);
-  border-color: rgba(245, 158, 11, 0.55);
+  border-color: rgba(245, 158, 11, 0.6);
   transform: translateY(-1px);
-}
-
-@media (max-width: 1120px) {
-  .header-mission-pill {
-    display: none;
-  }
 }
 
 /* Ribbon Controls */
